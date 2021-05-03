@@ -1,8 +1,8 @@
 "
-cnc(chemical)
-hl(drawing)
+cnc(chemical).
+hl(drawing).
 
-chemical_image :- cnc(chemical), hl(chemicalstructure)
-non_chemical_image :- cnc(nonchemical)
-non_chemical_image :- not hl(chemicalstructure)
+chemical_image :- cnc(chemical), hl(chemicalstructure).
+non_chemical_image :- cnc(nonchemical).
+non_chemical_image :- not hl(chemicalstructure).
 "

@@ -32,15 +32,15 @@ x Define program
 
 inference_program = """
 % We define our neural rules
-nn(cnc, image, [chemical, nonchemical])
-nn(hl, image, ['character', 'chemicalstructure', 'drawing', 'flowchart', 'genesequence', 'graph', 'math', 'programlisting', 'table'])
+nn(cnc, image, [chemical, nonchemical]).
+nn(hl, image, ['character', 'chemicalstructure', 'drawing', 'flowchart', 'genesequence', 'graph', 'math', 'programlisting', 'table']).
 
 % If both cnc and hl infer chemical, the image is chemical
-chemical_image :- cnc(chemical), hl(chemicalstructure)
+chemical_image :- cnc(chemical), hl(chemicalstructure).
 
 % If either cnc or hl infer non chemical, the image is not chemical
-non_chemical_image :- cnc(nonchemical)
-non_chemical_image :- not hl(chemicalstructure)
+non_chemical_image :- cnc(nonchemical).
+non_chemical_image :- not hl(chemicalstructure).
 """
 
 if __name__ == "__main__":
@@ -52,7 +52,12 @@ if __name__ == "__main__":
     model_mapping = {"cnc":cnc,
                      "hl": hl}
 
+    # Initialize our inputs dictionary and process the paths into data tensors
+    inputs_dict = {"image": "example_image.tif"}
+    inputs_tensor_dict = {name:load(path) for name, path in inputs_dict.items()}
+
     orchestrator = Orchestrator(inference_program, model_mapping)
     print(repr(orchestrator))
 
+    orchestrator.infer(inputs_tensor_dict)
 

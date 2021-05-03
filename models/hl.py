@@ -1,5 +1,7 @@
 import torch
 
+from PIL import Image
+
 classes = ['character', 'chemicalstructure', 'drawing', 'flowchart', 'genesequence', 'graph', 'math', 'programlisting', 'table']
 
 class HL_net():
@@ -11,3 +13,12 @@ class HL_net():
         self.input_type = "image"
         self.inference_type = "classification"
         self.base_model = 'inception_v3'
+
+    def infer(self, image):
+        """
+        Parse image
+        Infer
+        Return
+        """
+
+        return "chemical_structure"

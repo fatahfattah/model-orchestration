@@ -12,3 +12,13 @@ class CNC_net():
         self.input_type = "image"
         self.inference_type = "classification"
         self.base_model = 'inception_v3'
+
+
+    def infer(self, image):
+        """
+        Parse image
+        Infer
+        Return
+        """
+
+        return "nonchemical"
