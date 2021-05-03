@@ -1,3 +1,4 @@
+from asp import ASPLoader
 
 import logging
 
@@ -35,7 +36,13 @@ class Orchestrator():
 
         # Replace our neural rule with the actual inferences
         for model_name, inference in inferences.items():
-            parsed_program = "\n".join([f"{model_name}({inference})" if line.startswith("nn(") and model_name in line 
+            parsed_program = "\n".join([f"{model_name}({inference})." if line.startswith("nn(") and model_name in line 
                           else line for line in parsed_program.split('\n')])
 
         print(parsed_program)
+
+        # parsed_program = "\n".join([line for line in parsed_program.split("\n") if not line.startswith('%')])
+        
+        asp_program = ASPLoader.parse_string(parsed_program)
+
+        return asp_program.solve()

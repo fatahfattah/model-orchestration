@@ -8,7 +8,7 @@ from gen.ASPLexer import ASPLexer
 from gen.ASPListener import ASPListener
 from ASPErrorListener import ASPErrorListener
 
-logging.basicConfig(filename='./tmp/ASPParser.log', filemode='w', level=logging.INFO)
+logging.basicConfig(filename='./asp/tmp/ASPParser.log', filemode='w', level=logging.INFO)
 
 class ASPLoader(ASPListener):
     def __init__(self):

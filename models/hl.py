@@ -1,10 +1,10 @@
 import torch
-
-from PIL import Image
+import torchvision.transforms as transforms
 
 classes = ['character', 'chemicalstructure', 'drawing', 'flowchart', 'genesequence', 'graph', 'math', 'programlisting', 'table']
 
 class HL_net():
+
     def __init__(self):
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.load_state_dict(torch.load('./models/hl.pth'))
@@ -13,6 +13,10 @@ class HL_net():
         self.input_type = "image"
         self.inference_type = "classification"
         self.base_model = 'inception_v3'
+        self.preprocessing = transforms.Compose([transforms.ToTensor(),
+                                                 transforms.Resize((299,299)),
+                                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
 
     def infer(self, image):
         """
@@ -21,4 +25,4 @@ class HL_net():
         Return
         """
 
-        return "chemical_structure"
+        return "chemicalstructure"

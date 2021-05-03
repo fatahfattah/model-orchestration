@@ -1,25 +1,13 @@
 import sys
-sys.path.append('..')
+sys.path.append('asp')
 
-import torch
-import torch.optim as optim
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Subset
-
-from sklearn.model_selection import train_test_split
-
-import matplotlib.pyplot as plt
-import numpy as np
+from dataloader import load_input
 
 from orchestrator import Orchestrator
 
 from models.cnc import CNC_net
 from models.hl import HL_net
 
-from tqdm import tqdm
 
 """
 Program to make an inference using given ASP rules and nn's
@@ -36,11 +24,11 @@ nn(cnc, image, [chemical, nonchemical]).
 nn(hl, image, ['character', 'chemicalstructure', 'drawing', 'flowchart', 'genesequence', 'graph', 'math', 'programlisting', 'table']).
 
 % If both cnc and hl infer chemical, the image is chemical
-chemical_image :- cnc(chemical), hl(chemicalstructure).
+chemicalimage :- cnc(chemical), hl(chemicalstructure).
 
 % If either cnc or hl infer non chemical, the image is not chemical
-non_chemical_image :- cnc(nonchemical).
-non_chemical_image :- not hl(chemicalstructure).
+nonchemicalimage :- cnc(nonchemical).
+nonchemicalimage :- not hl(chemicalstructure).
 """
 
 if __name__ == "__main__":
@@ -54,10 +42,11 @@ if __name__ == "__main__":
 
     # Initialize our inputs dictionary and process the paths into data tensors
     inputs_dict = {"image": "example_image.tif"}
-    inputs_tensor_dict = {name:load(path) for name, path in inputs_dict.items()}
+    inputs_tensor_dict = {name:load_input(name, path) for name, path in inputs_dict.items()}
 
     orchestrator = Orchestrator(inference_program, model_mapping)
     print(repr(orchestrator))
 
-    orchestrator.infer(inputs_tensor_dict)
+    answer_sets = orchestrator.infer(inputs_tensor_dict)
 
+    print(f"Answer sets: {answer_sets}")
