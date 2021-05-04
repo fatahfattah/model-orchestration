@@ -28,7 +28,7 @@ class CNC_net():
         Infer
         Return
         """
-        # image = self.preprocessing(image)
-        # output, aux = self.model(image)
+        image = self.preprocessing(image)
+        output, aux = self.model(image)
 
         return "chemical"

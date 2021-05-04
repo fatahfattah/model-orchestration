@@ -22,7 +22,7 @@ class Orchestrator():
         Models: {[f"{name}: {model.description}" for name, model in self.models.items()]}
         """)
     
-    def __on_model(self, model):
+    def on_model(self, model):
         answer_set = []
         for atom in model.symbols(atoms="True"):
             answer_set.append(str(atom))
@@ -30,7 +30,7 @@ class Orchestrator():
 
     def infer(self, inputs_dict):
         """
-        Make an inference on a given input
+        Make an inference on a given set of inputs
         - First we let each individual neural network make an inference on the given inputs
         - We then parse the inferences into the ASP program
         - Finally we find a stable model under the newly parsed program
@@ -41,16 +41,15 @@ class Orchestrator():
         # We pass the relevant inputs for each model based on their input_type so that they can make an inference
         inferences = {name:model.infer(inputs_dict[model.input_type]) for name, model in self.models.items()}
 
-        # Replace our neural rule with the actual inferences
+        # Replace our neural rules with the actual inferences
         for model_name, inference in inferences.items():
-            parsed_program = "\n".join([f"{model_name}({inference})." if line.startswith("nn(") and model_name in line 
-                          else line for line in parsed_program.split('\n')])
-
-        parsed_program = "\n".join([line for line in parsed_program.split("\n") if not line.startswith('%')])
+            parsed_program = "\n".join([f"{model_name}({inference})." 
+                                        if line.startswith("nn(") and model_name in line 
+                                        else line for line in parsed_program.split('\n')])
         
         clingo_control = clingo.Control([])
         clingo_control.add("base", [], parsed_program)
         clingo_control.ground([("base", [])])
-        clingo_control.solve(on_model=self.__on_model)
+        clingo_control.solve(on_model=self.on_model)
 
         return self.answer_sets
