@@ -1,4 +1,5 @@
 from asp import ASPLoader
+import clingo
 
 import logging
 
@@ -12,15 +13,21 @@ class Orchestrator():
 
         self.program = program
         self.models = models
+        self.answer_sets = []
 
     def __repr__(self):
         return (f"""
         This is an orchestrator instance.
         Number of models: {len(self.models.keys())}
         Models: {[f"{name}: {model.description}" for name, model in self.models.items()]}
-        ASP program: {self.program}
         """)
     
+    def __on_model(self, model):
+        answer_set = []
+        for atom in model.symbols(atoms="True"):
+            answer_set.append(str(atom))
+        self.answer_sets.append(answer_set)
+
     def infer(self, inputs_dict):
         """
         Make an inference on a given input
@@ -39,10 +46,11 @@ class Orchestrator():
             parsed_program = "\n".join([f"{model_name}({inference})." if line.startswith("nn(") and model_name in line 
                           else line for line in parsed_program.split('\n')])
 
-        print(parsed_program)
-
-        # parsed_program = "\n".join([line for line in parsed_program.split("\n") if not line.startswith('%')])
+        parsed_program = "\n".join([line for line in parsed_program.split("\n") if not line.startswith('%')])
         
-        asp_program = ASPLoader.parse_string(parsed_program)
+        clingo_control = clingo.Control([])
+        clingo_control.add("base", [], parsed_program)
+        clingo_control.ground([("base", [])])
+        clingo_control.solve(on_model=self.__on_model)
 
-        return asp_program.solve()
+        return self.answer_sets

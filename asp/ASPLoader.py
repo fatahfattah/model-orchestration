@@ -1,6 +1,7 @@
 import antlr4
 import logging
 import sys, getopt
+sys.path.append('asp')
 
 import ASPDataStructures as lp
 from gen.ASPParser import ASPParser

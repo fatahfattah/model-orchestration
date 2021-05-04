@@ -1,3 +1,6 @@
+import sys
+sys.path.append('asp')
+
 import ASPLoader
 from clingo import Control
 
