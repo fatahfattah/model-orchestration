@@ -1,10 +1,6 @@
 import torch
 import torchvision.transforms as transforms
 
-from PIL import Image
-
-import numpy as np
-
 classes = ['chemical', 'nonchemical']
 
 class CNC_net():
@@ -17,6 +13,8 @@ class CNC_net():
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.load_state_dict(torch.load('./models/cnc.pth', map_location=torch.device('cpu')))
         self.model.eval()
+        self.name = "Chemical/non-chemical network"
+        self.small_name = "cnc"
         self.description = "Classifies whether an image contains a chemical structure depiction"
         self.input_size = (299,299)
         self.input_type = "image"
@@ -34,10 +32,16 @@ class CNC_net():
         Infer
         Return
         """
+        prediction = ""
+
         image = image.convert('RGB')
         image = self.preprocessing(image)
-        # image = image.unsqueeze(0)
         with torch.no_grad():
-            self.model(image)
+            outputs = self.model(image[None, ...])
+            aux, predicted = torch.max(outputs, 1)
+            confidence = round(aux[0].item(), 2)
+            prediction = classes[predicted[0]]
 
-        return "chemical"
+
+        print(f"{self.small_name} output: {prediction}@{confidence}")
+        return prediction
