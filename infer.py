@@ -39,7 +39,7 @@ if __name__ == "__main__":
                      "hl": HL_net()}
 
     # Initialize our inputs dictionary and process the paths into data tensors
-    inputs_dict = {"image": "example_image.tif"}
+    inputs_dict = {"image": "example_image.png"}
     inputs_tensor_dict = {name:load_input(name, path) for name, path in inputs_dict.items()}
 
     orchestrator = Orchestrator(inference_program, model_mapping)

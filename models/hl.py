@@ -28,5 +28,9 @@ class HL_net():
         Infer
         Return
         """
+        # image = image.convert('RGB')
+        # image = image.unsqueeze()
+        # image = self.preprocessing(image)
+        # output, aux = self.model(image)
 
         return "chemicalstructure"
