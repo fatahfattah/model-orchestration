@@ -1,10 +1,10 @@
+import getopt
+import argparse
 import sys
 sys.path.append('asp')
 
 from dataloader import load_input
-
 from orchestrator import Orchestrator
-
 from models.cnc import CNC_net
 from models.hl import HL_net
 
@@ -32,6 +32,15 @@ nonchemicalimage :- not hl(chemicalstructure).
 """
 
 if __name__ == "__main__":
+    image_filename = ''
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-image", help="Provide the path to an input image", required=False)
+    parser.add_argument("-text", help="Provide the path to an input text", required=False)
+    args = parser.parse_args()
+
+    if args.image:
+        image_filename = args.image
+
     print(f"Our program is defined as:\n{inference_program}")
     print(f"Now we load in our nn's")
 
@@ -39,7 +48,7 @@ if __name__ == "__main__":
                      "hl": HL_net()}
 
     # Initialize our inputs dictionary and process the paths into data tensors
-    inputs_dict = {"image": "example_image.tif"}
+    inputs_dict = {"image": image_filename}
     inputs_tensor_dict = {name:load_input(name, path) for name, path in inputs_dict.items()}
 
     orchestrator = Orchestrator(inference_program, model_mapping)

@@ -2,8 +2,10 @@ from asp import ASPLoader
 import clingo
 
 import logging
-
 logger = logging.getLogger('orchestrator')
+
+import warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 
 class Orchestrator():
     def __init__(self, program, models):
