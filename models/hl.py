@@ -44,5 +44,5 @@ class HL_net():
             prediction = classes[predicted[0]]
 
 
-        print(f"{self.small_name} output: {prediction}@{confidence}")
+        print(f"{self.small_name}: {prediction}@{confidence}")
         return prediction

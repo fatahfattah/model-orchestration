@@ -35,19 +35,8 @@ class PC_net():
         labels = db.labels_
         # -1 label corresponds to noisy output, so we remove one count if the label is present
         n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-        output = "none"
 
-        if n_clusters == 1:
-            output = "one"
-        elif n_clusters > 1:
-            output = "multi"
+        # Display
+        print(f"{self.small_name}: {n_clusters} clusters")
 
-        print(f"{self.small_name} output: {output}@{n_clusters}")
-        return output
-
-
-if __name__ == "__main__":
-    pc = PC_net()
-    image = load_input("image", "../example_image.tif")
-    
-    print(pc.infer(image))
+        return str(n_clusters)

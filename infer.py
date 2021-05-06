@@ -23,7 +23,7 @@ inference_program = """
 % We define our neural rules
 #external cnc(chemical;nonchemical).
 #external hl(character;chemicalstructure;drawing;flowchart;genesequence;graph;math;programlisting;table).
-#external pc(none;one;multi).
+#external pc(n_clusters).
 
 % If both cnc and hl infer chemical, the image is chemical
 chemicalimage :- cnc(chemical), hl(chemicalstructure).
@@ -33,10 +33,10 @@ nonchemicalimage :- cnc(nonchemical).
 nonchemicalimage :- not hl(chemicalstructure).
 
 % If there is a chemicalimage and multiple pixel clusters, we have one chemical depiction
-onechemicalstructure :- chemicalimage, pc(one).
+onechemicalstructure :- chemicalimage, pc(n_clusters) == 1.
 
 % If there is a chemicalimage and multiple pixel clusters, we have many chemical depiction
-manychemicalstructure :- chemicalimage, pc(multi).
+manychemicalstructure :- chemicalimage, pc(n_clusters) > 1.
 """
 
 
