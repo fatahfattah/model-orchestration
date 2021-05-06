@@ -7,21 +7,23 @@ from dataloader import load_input
 from orchestrator import Orchestrator
 from models.cnc import CNC_net
 from models.hl import HL_net
+from models.pc import PC_net
 
 
 """
 Program to make an inference using given ASP rules and nn's
 x Define program
 x Load models
-- Make inferences
-- Parse outputs
+x Make inferences
+x Parse outputs
 x Retrieve SM
 """
 
 inference_program = """
 % We define our neural rules
-nn(cnc, image, [chemical, nonchemical]).
-nn(hl, image, [character, chemicalstructure, drawing, flowchart, genesequence, graph, math, programlisting, table]).
+#external cnc(chemical;nonchemical).
+#external hl(character;chemicalstructure;drawing;flowchart;genesequence;graph;math;programlisting;table).
+#external pc(none;one;multi).
 
 % If both cnc and hl infer chemical, the image is chemical
 chemicalimage :- cnc(chemical), hl(chemicalstructure).
@@ -29,15 +31,22 @@ chemicalimage :- cnc(chemical), hl(chemicalstructure).
 % If either cnc or hl infer non chemical, the image is not chemical
 nonchemicalimage :- cnc(nonchemical).
 nonchemicalimage :- not hl(chemicalstructure).
+
+% If there is a chemicalimage and multiple pixel clusters, we have one chemical depiction
+onechemicalstructure :- chemicalimage, pc(one).
+
+% If there is a chemicalimage and multiple pixel clusters, we have many chemical depiction
+manychemicalstructure :- chemicalimage, pc(multi).
 """
 
+
 if __name__ == "__main__":
-    image_filename = ''
     parser = argparse.ArgumentParser()
     parser.add_argument("-image", help="Provide the path to an input image", required=False)
     parser.add_argument("-text", help="Provide the path to an input text", required=False)
     args = parser.parse_args()
 
+    image_filename = 'example_image.tif'
     if args.image:
         image_filename = args.image
 
@@ -45,7 +54,8 @@ if __name__ == "__main__":
     print(f"Now we load in our nn's")
 
     model_mapping = {"cnc": CNC_net(),
-                     "hl": HL_net()}
+                     "hl": HL_net(),
+                     "pc": PC_net()}
 
     # Initialize our inputs dictionary and process the paths into data tensors
     inputs_dict = {"image": image_filename}

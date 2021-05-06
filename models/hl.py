@@ -11,6 +11,7 @@ class HL_net():
 
     def __init__(self):
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
+        self.model.fc = torch.nn.Linear(2048, len(classes))
         self.model.load_state_dict(torch.load('./models/hl.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.name = "Higher level network"

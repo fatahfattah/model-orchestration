@@ -19,12 +19,15 @@ class Orchestrator():
 
     def __repr__(self):
         return (f"""
-        This is an orchestrator instance.
+        Orchestrator.
         Number of models: {len(self.models.keys())}
         Models: {[f"{name}: {model.description}" for name, model in self.models.items()]}
         """)
     
     def on_model(self, model):
+        """
+        Callback for when we are able to retrieve a set of stable models
+        """
         answer_set = []
         for atom in model.symbols(atoms="True"):
             answer_set.append(str(atom))
@@ -39,19 +42,25 @@ class Orchestrator():
         """
 
         parsed_program = self.program
-        
+
         # We pass the relevant inputs for each model based on their input_type so that they can make an inference
         inferences = {name:model.infer(inputs_dict[model.input_type]) for name, model in self.models.items()}
 
-        # Replace our neural rules with the actual inferences
-        for model_name, inference in inferences.items():
-            parsed_program = "\n".join([f"{model_name}({inference})." 
-                                        if line.startswith("nn(") and model_name in line 
-                                        else line for line in parsed_program.split('\n')])
-        
+        # Instantiate a Clingo solver and solve it given our parsed program
         clingo_control = clingo.Control([])
         clingo_control.add("base", [], parsed_program)
         clingo_control.ground([("base", [])])
+
+        # We induct the inference values into the external atoms defined in the program, by setting their truth value
+        for name, inference in inferences.items():
+            clingo_control.assign_external(clingo.Function(f"{name}", [clingo.Function(inference)]), True)
+
         clingo_control.solve(on_model=self.on_model)
 
         return self.answer_sets
+
+    def train():
+        return ""
+
+    def validate():
+        return ""
