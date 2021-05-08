@@ -28,10 +28,20 @@ adj(X,Y) :- a(X), a(Y), Y-X==2.
 trans(X,Y,Z) :- adj(X,Y), adj(Y,Z), adj(X,Z).
 """
 
+prog4 = """
+#external cnc(inference, confidence).
+
+outcome :- cnc(inference, confidence), inference == chemical, confidence == 100.
+"""
+
 ctl = clingo.Control()
-ctl.add("base", [], prog1)
+ctl.add("base", [], prog4)
 ctl.ground([("base", [])])
-ctl.assign_external(clingo.Function("cnc", [clingo.Function("chemical")], True), True)
-ctl.assign_external(clingo.Function("hl", [clingo.Function("chemicalstructure")], True), True)
+
+# ctl.assign_external(clingo.Function("cnc", [clingo.Function("inference", [clingo.Function("chemical")], True)], True), True)
+
+ctl.assign_external(clingo.Function("cnc", [clingo.Function("chemical"), clingo.Function("100")], True), True)
+# ctl.assign_external(clingo.Function("cnc", [clingo.Function("chemical")], True), True)
+# ctl.assign_external(clingo.Function("hl", [clingo.Function("chemicalstructure")], True), True)
 # ctl.assign_external(clingo.Function("model", [clingo.Function("apple")], True), True)
 ctl.solve(on_model=lambda m: print("Answer: {}".format(m)))
