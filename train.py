@@ -19,10 +19,10 @@ Now we can build a dataloader that loads in the dataset from modela regularly bu
 Open questions:
 - Can we train all models in the network at the same time?
 - How 'automatic' is this training?
-- How do we train model a from modelb and modelb from modela with one generic call?
+- How do we train model a from modelb and modelb from model a with one generic call?
 
 Notes:
-- We can/will use the inference code, infer.py.
+- We can use the inference code, infer.py.
 - Do we simply use folder names as classnames?
 """
 
@@ -50,4 +50,3 @@ if __name__ == "__main__":
     orchestrator = orchestrator(model_mapping)
     orchestrator.train(training_program_mapping)
 
-    
