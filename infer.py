@@ -1,4 +1,3 @@
-import getopt
 import argparse
 import sys
 sys.path.append('asp')
@@ -47,17 +46,12 @@ if __name__ == "__main__":
     parser.add_argument("-o", help="Provide the label(s) which you want the network to classify.", required=False)
     args = parser.parse_args()
 
-    image_filename = 'example_image.tif'
-    if args.image:
-        image_filename = args.image
-
-    output_labels = []
-    if args.o:
-        output_labels = args.o.split(',')
-
+    image_filename = args.image if args.image else 'example_image.tif'
+    output_labels = args.o.split(',') if args.o else []
+    
     print(f"Our program is defined as:\n{inference_program}")
+    
     print(f"Now we load in our nn's")
-
     model_mapping = {"cnc": CNC_net(),
                      "hl": HL_net(),
                      "pc": PC_net()}
