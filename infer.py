@@ -69,4 +69,4 @@ if __name__ == "__main__":
     if output_labels:
         print(f"The truth value of the desired output(s):")
         for output_label in output_labels:
-            print(f"{output_label}:{output_label in answer_sets[0]}")
+            print(f"{output_label}:{output_label in answer_sets[-1]}")

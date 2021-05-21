@@ -50,7 +50,6 @@ if __name__ == "__main__":
 
     print(f"We will start validation...\n\tValidation for: {truth_label}\n\tDirectory: {directory}\n\tN samples: {n}")
 
-
     print(f"Our program is defined as:\n{validation_program}")
     
     print(f"Now we load in our nn's")
@@ -73,9 +72,22 @@ if __name__ == "__main__":
 
         answer_sets = orchestrator.infer(inputs_tensor_dict)
 
-        if truth_label in answer_sets[0]:
+        if truth_label in answer_sets[-1]:
             n_correct += 1
         else:
             n_incorrect += 1
-    
-    print(f"Validation finished...\n\tN total samples: {n}\n\tN correct predictions: {n_correct}\n\tN incorrect predictions: {n_incorrect}")
+
+        print(answer_sets)
+
+    precision = round((n_correct / n)*100, 2)
+    recall = round((n_correct / (n_correct+n_incorrect))*100, 2) if n_correct else 0.00
+    accuracy = round((n_correct / n)*100, 2) if n_correct else 0.00
+    f1 = round(2*((precision*recall)/(precision+recall)), 2)
+    print(f"""\nValidation finished...
+                \tN total samples: {n}
+                \tN correct predictions: {n_correct}
+                \tN incorrect predictions: {n_incorrect}
+                \tRecall: {recall}%
+                \tAccuracy: {accuracy}%
+                \tF1: {f1}%""")
+                
