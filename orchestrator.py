@@ -1,3 +1,4 @@
+import os
 from asp import ASPLoader
 import clingo
 
@@ -59,8 +60,42 @@ class Orchestrator():
 
         return self.answer_sets
 
-    def train():
-        return ""
+    def validate(self, directory, truth_label, n):
+        """
+        Function to validate a 
+        """
+        n_correct = 0
+        n_incorrect = 0
+        for image in os.listdir(directory)[:n]:
+            image_path = os.path.join(directory, image)
+            print(image_path)
 
-    def validate():
+            # Initialize our inputs dictionary and process the paths into data tensors
+            inputs_dict = {"image": image_path}
+            inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
+
+            answer_sets = self.infer(inputs_tensor_dict)
+
+            if truth_label in answer_sets[-1]:
+                n_correct += 1
+            else:
+                n_incorrect += 1
+
+            print(answer_sets)
+
+        precision = round((n_correct / n)*100, 2)
+        recall = round((n_correct / (n_correct+n_incorrect))*100, 2) if n_correct else 0.00
+        accuracy = round((n_correct / n)*100, 2) if n_correct else 0.00
+        f1 = round(2*((precision*recall)/(precision+recall)), 2)
+        print(f"""\nValidation finished...
+                    \tN total samples: {n}
+                    \tN correct predictions: {n_correct}
+                    \tN incorrect predictions: {n_incorrect}
+                    \tRecall: {recall}%
+                    \tAccuracy: {accuracy}%
+                    \tF1: {f1}%""")
+
+        return (precision, recall, accuracy, f1)
+
+    def train():
         return ""
