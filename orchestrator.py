@@ -1,5 +1,6 @@
 import os
 from asp import ASPLoader
+from dataloader import load_input
 import clingo
 
 import logging
@@ -81,12 +82,12 @@ class Orchestrator():
             else:
                 n_incorrect += 1
 
-            print(answer_sets)
+            print(answer_sets[-1])
 
-        precision = round((n_correct / n)*100, 2)
+        precision = round((n_correct / n)*100, 2) if n_correct else 0.00
         recall = round((n_correct / (n_correct+n_incorrect))*100, 2) if n_correct else 0.00
         accuracy = round((n_correct / n)*100, 2) if n_correct else 0.00
-        f1 = round(2*((precision*recall)/(precision+recall)), 2)
+        f1 = round(2*((precision*recall)/(precision+recall)), 2)  if precision and recall else 0.00
         print(f"""\nValidation finished...
                     \tN total samples: {n}
                     \tN correct predictions: {n_correct}

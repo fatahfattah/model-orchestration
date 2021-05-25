@@ -1,11 +1,10 @@
 import os
-import argparse
-from dataloader import load_input
+import argparse 
 from orchestrator import Orchestrator
 from models.cnc import CNC_net
 from models.hl import HL_net
 from models.pc import PC_net
-
+import time
 
 
 """
@@ -63,4 +62,8 @@ if __name__ == "__main__":
     orchestrator = Orchestrator(validation_program, model_mapping)
     print(repr(orchestrator))
 
+    start_time = time.time()
     precision, recall, accuracy, f1 = orchestrator.validate(directory, truth_label, n)
+
+    end_time = time.time()
+    print(f"Validation took: {round(end_time-start_time, 3)}s")
