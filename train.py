@@ -10,9 +10,10 @@ More concrete example: Train model A with labels Apple and Banana.
 
 Example ASP rules:
 #external modelb(red;green).
-Apple :- modelb(red).
-Apple :- modelb(green).
-Banana :- not Apple.
+
+apple :- modelb(red).
+apple :- modelb(green).
+banana :- not apple.
 
 Now we can build a dataloader that loads in the dataset from modela regularly but then uses this ASP program to filter out datapoints.
 
@@ -22,6 +23,7 @@ Open questions:
 - How do we train model a from modelb and modelb from model a with one generic call?
 
 Notes:
+- Here we train a specialization that we have discovered from our model exploration.
 - We can use the inference code, infer.py.
 - Do we simply use folder names as classnames?
 """
