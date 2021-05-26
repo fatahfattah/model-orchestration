@@ -1,7 +1,6 @@
 import torch
 import torchvision.transforms as transforms
 
-classes = ['chemical', 'nonchemical']
 
 class CNC_net():
     """
@@ -10,9 +9,9 @@ class CNC_net():
     """
 
     def __init__(self):
+        self.classes = ['chemical', 'nonchemical']
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
-        # self.model.fc = torch.nn.Linear(2048, len(classes))
-        self.model.fc = torch.nn.Linear(2048, 1000)
+        self.model.fc = torch.nn.Linear(2048, len(self.classes))
         self.model.load_state_dict(torch.load('./models/cnc.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.name = "Chemical/non-chemical network"
@@ -42,7 +41,7 @@ class CNC_net():
             outputs = self.model(image[None, ...])
             aux, predicted = torch.max(outputs, 1)
             confidence = round(aux[0].item(), 2)
-            prediction = classes[predicted[0]]
+            prediction = self.classes[predicted[0]]
 
 
         print(f"{self.small_name}: {prediction}@{confidence}")
