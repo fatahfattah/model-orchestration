@@ -57,11 +57,16 @@ if __name__ == "__main__":
             inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
             inferences.setdefault(truth_label, []).append({name:model.infer(inputs_tensor_dict[model.input_type]) for name, model in model_mapping.items()})
     
+    n_labels = len(inferences.keys())
+    fig = plt.figure()
+    fig_index = 1
     for i, v in inferences.items():
         print(f"truth: {i} ->")
         n = len(v)
         cooccurances = {}
 
+        headers = []
+        mat = []
         for inference in v:
             cooccur_key = "+".join([x for x in inference.values()])
             cooccurances.setdefault(cooccur_key, 0)
@@ -69,6 +74,24 @@ if __name__ == "__main__":
             
         cooccurances = dict(sorted(cooccurances.items(), key=lambda x:x[1], reverse=True))
         for cooccur_key, cooccur_n in cooccurances.items():
+            headers.append(cooccur_key)
+            mat.append(cooccur_n)
             print(f"\t{cooccur_key}".ljust(20), f"n: {cooccur_n},".ljust(5), f"{round(cooccur_n/n*100, 2)}%")
 
+        # We need a 2d mat to plot
+        mat = [mat]
+        ax = fig.add_subplot(n_labels, 1, fig_index)
+        img = plt.imshow(mat, interpolation=None)
+        ax.set_xticks([i for i in range(len(headers))])
+        ax.set_xticklabels(headers, rotation=-45)
+        ax.set_yticks([0])
+        ax.set_yticklabels([i])
+        plt.colorbar(img)
         print("\n")
+        fig_index+=1
+    
+    fig.tight_layout()
+    plt.show()
+
+    
+
