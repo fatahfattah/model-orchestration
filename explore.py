@@ -39,7 +39,8 @@ if __name__ == "__main__":
     print(f"We will start model exploration...\nDataset directory: {root_dir}")
 
     print(f"Now we load in our nn's")
-    model_mapping = {"cnc": CNC_net(),
+    model_mapping = {
+                    #  "cnc": CNC_net(),
                      "hl": HL_net(),
                     #  "pc": PC_net()
                      }
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     for truth_label in os.listdir(root_dir):
         directory = os.path.join(root_dir, truth_label)
 
-        for image in random.sample(os.listdir(directory), n):
+        for image in random.sample(os.listdir(directory), min(n, len(os.listdir(directory)))):
             image_path = os.path.join(directory, image)
 
             # Initialize our inputs dictionary and process the paths into data tensors
@@ -58,58 +59,16 @@ if __name__ == "__main__":
     
     for i, v in inferences.items():
         print(f"truth: {i} ->")
+        n = len(v)
+        cooccurances = {}
 
         for inference in v:
-            print(f"\t{inference}")
-        print("\n")
-
-    confusion = {}
-    for truth, _inferences in inferences.items():
-        confusion.setdefault(truth, {})
-        for v in _inferences:
-            for _, inference in v.items():
-                confusion[truth].setdefault(inference, 0)
-                confusion[truth][inference] += 1
-
-    for truth, confusions in confusion.items():
-        print(f"truth: {truth} ->")
-        for k, v in confusions.items():
-            print(f"\t{k}: {v}")
+            cooccur_key = "+".join([x for x in inference.values()])
+            cooccurances.setdefault(cooccur_key, 0)
+            cooccurances[cooccur_key] += 1
+            
+        cooccurances = dict(sorted(cooccurances.items(), key=lambda x:x[1], reverse=True))
+        for cooccur_key, cooccur_n in cooccurances.items():
+            print(f"\t{cooccur_key}".ljust(20), f"n: {cooccur_n},".ljust(5), f"{round(cooccur_n/n*100, 2)}%")
 
         print("\n")
-
-    corr_headers = [item for sublist in [m.classes for m in model_mapping.values()] for item in sublist]
-    print(corr_headers)
-    corr_matrix = [[0]*len(corr_headers) for _ in range(len(corr_headers))]
-
-    for truth, infers in inferences.items():
-        for infer in infers:
-            j = corr_headers.index(infer['cnc'])
-            i = corr_headers.index(infer['hl'])
-            corr_matrix[i][j] += 1
-
-    print(corr_matrix)
-
-    fig, ax = plt.subplots(1,1)
-    img = plt.imshow(corr_matrix, interpolation=None)
-    ax.set_xticks([i for i in range(len(corr_headers))])
-    ax.set_xticklabels(corr_headers, rotation=-45)
-    ax.set_yticks([i for i in range(len(corr_headers))])
-    ax.set_yticklabels(corr_headers)
-    plt.colorbar(img)
-    plt.show()
-
-    """
-    truth: math ->
-        {'cnc': 'nonchemical', 'hl': 'genesequence'}
-        {'cnc': 'chemical', 'hl': 'math'}
-        {'cnc': 'nonchemical', 'hl': 'programlisting'}
-        {'cnc': 'nonchemical', 'hl': 'math'}
-        {'cnc': 'nonchemical', 'hl': 'math'}
-        {'cnc': 'nonchemical', 'hl': 'math'}
-        {'cnc': 'nonchemical', 'hl': 'math'}
-        {'cnc': 'nonchemical', 'hl': 'math'}
-        {'cnc': 'chemical', 'hl': 'math'}
-        {'cnc': 'chemical', 'hl': 'genesequence'}
-    
-    """

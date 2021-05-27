@@ -57,7 +57,8 @@ if __name__ == "__main__":
     print(f"Now we load in our nn's")
     model_mapping = {"cnc": CNC_net(),
                      "hl": HL_net(),
-                     "pc": PC_net()}
+                    #  "pc": PC_net()
+                     }
 
     orchestrator = Orchestrator(validation_program, model_mapping)
     print(repr(orchestrator))
