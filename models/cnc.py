@@ -1,25 +1,26 @@
 import torch
 import torchvision.transforms as transforms
+from agent import Agent
 
-
-class CNC_net():
+class CNC_net(Agent):
     """
     Chemical/non-chemical (CNC) network
     Predict whether an image contains a chemical structure or not.
     """
 
     def __init__(self):
-        self.classes = ['chemical', 'nonchemical']
+        super().__init__(['chemical', 'nonchemical'],
+                        "Chemical/non-chemical network",
+                        "cnc",
+                        "Classifies whether an image contains a chemical structure depiction",
+                        "image",
+                        "classification")
+
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
-        self.model.fc = torch.nn.Linear(2048, len(self.classes))
+        self.model.fc = torch.nn.Linear(2048, 1000)
         self.model.load_state_dict(torch.load('./models/cnc.pth', map_location=torch.device('cpu')))
         self.model.eval()
-        self.name = "Chemical/non-chemical network"
-        self.small_name = "cnc"
-        self.description = "Classifies whether an image contains a chemical structure depiction"
         self.input_size = (299,299)
-        self.input_type = "image"
-        self.inference_type = "classification"
         self.base_model = 'inception_v3'
         self.preprocessing = transforms.Compose([
                                                  transforms.ToTensor(),

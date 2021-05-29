@@ -60,7 +60,20 @@ if __name__ == "__main__":
                     #  "pc": PC_net()
                      }
 
-    orchestrator = Orchestrator(validation_program, model_mapping)
+    social_structure = SocialStructure()
+    cnc = CNC_net()
+    hl = HL_net()
+    pc = PC_net()
+    social_structure.add_agent(cnc)
+    social_structure.add_agent(hl)
+    # social_structure.add_agent(pc)
+
+    social_structure.add_rule(Rule("chemicalimage", [PositiveCondition(cnc, "chemical"), PositiveCondition(hl, "chemicalstructure")]))
+    social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cnc, "nonchemical"), NegativeCondition(hl, "chemicalstructure")]))
+    # social_structure.add_rule(Rule("onechemicalimage", [LiteralCondition("chemicalimage"), ComparisonCondition(pc, "n_clusters", "==", 1)]))
+    # social_structure.add_rule(Rule("manychemicalimage", [LiteralCondition("chemicalimage"), ComparisonCondition(pc, "n_clusters", ">", 1)]))
+
+    orchestrator = Orchestrator(social_structure)
     print(repr(orchestrator))
 
     start_time = time.time()

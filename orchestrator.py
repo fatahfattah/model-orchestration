@@ -9,21 +9,24 @@ logger = logging.getLogger('orchestrator')
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 
+from socialstructure import SocialStructure
+
 class Orchestrator():
-    def __init__(self, program, models):
-        if not program or not models:
-            logger.error(f"Error: Please make sure that you have provided a ASP program and the relevant models")
+    def __init__(self,social_structure):
+        if not social_structure:
+            logger.error(f"Error: Please make sure that you have provided a social structure of agents")
             return
 
-        self.program = program
-        self.models = models
+        self.social_structure = social_structure
+        self.program = social_structure.to_ASP()
         self.answer_sets = []
 
     def __repr__(self):
         return (f"""
         Orchestrator.
-        Number of models: {len(self.models.keys())}
-        Models: {[f"{name}: {model.description}" for name, model in self.models.items()]}
+        Number of agents: {len(self.social_structure.agents)}
+        Agents: {[f"{agent.small_name}: {agent.description}" for agent in self.social_structure.agents]}
+        Program: {self.program}
         """)
     
     def on_model(self, model):
@@ -46,7 +49,7 @@ class Orchestrator():
         parsed_program = self.program
 
         # We pass the relevant inputs for each model based on their input_type so that they can make an inference
-        inferences = {name:model.infer(inputs_dict[model.input_type]) for name, model in self.models.items()}
+        inferences = self.social_structure.infer(inputs_dict)
 
         # Instantiate a Clingo solver and solve it given our parsed program
         clingo_control = clingo.Control([])

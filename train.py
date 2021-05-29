@@ -32,8 +32,12 @@ Notes:
 training_program = """
 #external hl(character;chemicalstructure;drawing;flowchart;genesequence;graph;math;programlisting;table).
 
+chemichal :- hl(programlisting).
+chemichal :- hl(drawing).
+chemichal :- hl(genesequence).
 chemichal :- hl(chemicalstructure).
-nonchemical :- not hl(chemicalstructure).
+
+nonchemical :- not chemical.
 """
 
 if __name__ == "__main__":
@@ -52,3 +56,4 @@ if __name__ == "__main__":
     orchestrator = orchestrator(model_mapping)
     orchestrator.train(training_program_mapping)
 
+    

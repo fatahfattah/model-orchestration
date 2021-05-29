@@ -8,7 +8,9 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from dataloader import load_input
 
-class PC_net():
+from agent import Agent
+
+class PC_net(Agent):
     """
     Pixel clustering classifier
     Predict the number of pixel clusters that an image contains
@@ -16,12 +18,13 @@ class PC_net():
     """
 
     def __init__(self):
-        self.name = "Pixel clustering classifier"
-        self.small_name = "pc"
-        self.description = "Predict the number of pixel clusters that an image contains"
-        self.input_type = "image"
-        self.inference_type = "clustering"
-
+        super().__init__(["n_clusters"],
+                         "Pixel clustering classifier",
+                         "pc",
+                         "Predict the number of pixel clusters that an image contains.",
+                         "image",
+                         "clustering")
+        
     def infer(self, image):
         """
         Resizes the given image to 100x100, since DBSCAN on big images is too slow
