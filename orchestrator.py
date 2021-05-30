@@ -13,6 +13,11 @@ from socialstructure import SocialStructure
 
 class Orchestrator():
     def __init__(self,social_structure):
+        """Orchestrator class that 'orchestrates' a social structure of agents and rules.
+
+        Args:
+            social_structure (SocialStructure): object that represent a set of agents and rules.
+        """
         if not social_structure:
             logger.error(f"Error: Please make sure that you have provided a social structure of agents")
             return

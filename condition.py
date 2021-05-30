@@ -9,6 +9,11 @@ class Condition:
 
 class LiteralCondition(Condition):
     def __init__(self, literal) -> None:
+        """Literal condition of form 'a.'.
+
+        Args:
+            literal (String): E.g. 'a'
+        """
         super().__init__()
         self.literal = literal
 
@@ -17,6 +22,12 @@ class LiteralCondition(Condition):
 
 class PositiveCondition(Condition):
     def __init__(self, agent, outcome) -> None:
+        """A positive condition with for an agent output 'model(a)'
+
+        Args:
+            agent (String): modelname
+            outcome (String): output label
+        """
         super().__init__()
         self.agent = agent
         self.outcome = outcome
@@ -26,6 +37,12 @@ class PositiveCondition(Condition):
 
 class NegativeCondition(Condition):
     def __init__(self, agent, outcome) -> None:
+        """A negative condition with for an agent output e.g. ' not model(a)'
+
+        Args:
+            agent (String): modelname
+            outcome (String): output label
+        """
         super().__init__()
         self.agent = agent
         self.outcome = outcome
@@ -35,6 +52,14 @@ class NegativeCondition(Condition):
 
 class ComparisonCondition(Condition):
     def __init__(self, agent, outcome, operator, value) -> None:
+        """A comparison condition on an agent's inference e.g. 'model(a) > 1'
+
+        Args:
+            agent (String): modelname
+            outcome (String): output label
+            operater (String): operator such as >, <, >=, <=, ==
+            value (String): comparison value
+        """
         super().__init__()
         self.agent = agent
         self.outcome = outcome

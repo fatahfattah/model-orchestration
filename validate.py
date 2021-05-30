@@ -1,6 +1,7 @@
 import os
 import argparse 
 from orchestrator import Orchestrator
+from condition import *
 from models.cnc import CNC_net
 from models.hl import HL_net
 from models.pc import PC_net
@@ -51,14 +52,6 @@ if __name__ == "__main__":
     n = int(args.n) if args.n else len(os.listdir(directory))
 
     print(f"We will start validation...\n\tValidation for: {truth_label}\n\tDirectory: {directory}\n\tN samples: {n}")
-
-    print(f"Our program is defined as:\n{validation_program}")
-
-    print(f"Now we load in our nn's")
-    model_mapping = {"cnc": CNC_net(),
-                     "hl": HL_net(),
-                    #  "pc": PC_net()
-                     }
 
     social_structure = SocialStructure()
     cnc = CNC_net()
