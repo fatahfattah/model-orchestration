@@ -1,3 +1,5 @@
+from agent import Agent
+from rule import Rule
 
 class SocialStructure:
     def __init__(self) -> None:
@@ -7,7 +9,7 @@ class SocialStructure:
         self.agents = []
         self.rules = []
 
-    def add_agent(self, agent):
+    def add_agent(self, agent: Agent) -> None:
         """
         Add a new agent to the social structure.
         Every agent has to be an 'Agent' inherited class type.
@@ -17,7 +19,7 @@ class SocialStructure:
         """
         self.agents.append(agent)
 
-    def add_rule(self, rule):
+    def add_rule(self, rule: Rule) -> None:
         """
         Add a new rule to the social structure ruleset.
         Current support for rules with and without a head, e.g 'a :- b' or ':- b'.
@@ -27,7 +29,7 @@ class SocialStructure:
         """
         self.rules.append(rule)
 
-    def infer(self, inputs_dict):
+    def infer(self, inputs_dict: dict) -> dict:
         """Run inferences on all agents for the current input:
 
         Args:
@@ -38,7 +40,7 @@ class SocialStructure:
         """
         return {agent.small_name:agent.infer(inputs_dict[agent.input_type]) for agent in self.agents}
 
-    def to_ASP(self):
+    def to_ASP(self) -> str:
         """Parse the social structure to its respective ASP representation.
 
         Returns:

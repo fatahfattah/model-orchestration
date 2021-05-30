@@ -16,7 +16,7 @@ class Agent:
         self.input_type = input_type
         self.inference_type = inference_type
 
-    def to_ASP(self):
+    def to_ASP(self) -> str:
         """
         Convert agent to ASP representation.
 
@@ -24,7 +24,7 @@ class Agent:
         """
         return f"#external {self.small_name}({';'.join(self.classes)})."
 
-    def infer(self, input):
+    def infer(self, input) -> str:
         """
         Make an inference for this agent. 
 

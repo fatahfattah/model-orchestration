@@ -1,4 +1,7 @@
 import os
+from typing import List, Tuple
+
+from clingo.solving import Model
 from asp import ASPLoader
 from dataloader import load_input
 import clingo
@@ -12,7 +15,7 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 from socialstructure import SocialStructure
 
 class Orchestrator():
-    def __init__(self,social_structure):
+    def __init__(self, social_structure: SocialStructure):
         """Orchestrator class that 'orchestrates' a social structure of agents and rules.
 
         Args:
@@ -34,7 +37,7 @@ class Orchestrator():
         Program: {self.program}
         """)
     
-    def on_model(self, model):
+    def on_model(self, model: Model) -> None:
         """
         Callback for when we are able to retrieve a set of stable models
         """
@@ -43,7 +46,7 @@ class Orchestrator():
             answer_set.append(str(atom))
         self.answer_sets.append(answer_set)
 
-    def infer(self, inputs_dict):
+    def infer(self, inputs_dict: dict) -> List[List[str]]:
         """
         Make an inference on a given set of inputs
         - First we let each individual neural network make an inference on the given inputs
@@ -69,7 +72,7 @@ class Orchestrator():
 
         return self.answer_sets
 
-    def validate(self, directory, truth_label, n):
+    def validate(self, directory: str, truth_label: str, n: int) -> Tuple[int]:
         """
         Function to validate a 
         """
