@@ -12,7 +12,7 @@ from rule import *
 from orchestrator import Orchestrator
 from models.cnc import CNC_net
 from models.hl import HL_net
-from models.pc import PC_net
+from models.pc_experimental import PC_net
 
 
 """
@@ -44,8 +44,8 @@ if __name__ == "__main__":
 
     social_structure.add_rule(Rule("chemicalimage", [PositiveCondition(cnc, "chemical"), PositiveCondition(hl, "chemicalstructure")]))
     social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cnc, "nonchemical"), NegativeCondition(hl, "chemicalstructure")]))
-    social_structure.add_rule(Rule("onechemicalimage", [LiteralCondition("chemicalimage"), ComparisonCondition(pc, "n_clusters", "==", 1)]))
-    social_structure.add_rule(Rule("manychemicalimage", [LiteralCondition("chemicalimage"), ComparisonCondition(pc, "n_clusters", ">", 1)]))
+    social_structure.add_rule(Rule("onechemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "one")]))
+    social_structure.add_rule(Rule("manychemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "many")]))
 
     # Initialize our inputs dictionary and process the paths into data tensors
     inputs_dict = {"image": image_filename}

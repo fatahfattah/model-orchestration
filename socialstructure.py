@@ -36,7 +36,7 @@ class SocialStructure:
             inputs_dict (dict): e.g. {'image':[[]]}
 
         Returns:
-            {model_name:inference}: Key value pair dicht with model_names as keys and their inference as value
+            {model_name:inference}: Key value pair dict with model_names as keys and their inference as value
         """
         return {agent.small_name:agent.infer(inputs_dict[agent.input_type]) for agent in self.agents}
 

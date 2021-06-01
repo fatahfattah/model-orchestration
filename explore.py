@@ -14,7 +14,7 @@ We use the orchestrator to 'explore' our dataset, trying to find relations betwe
 
 Example:
 We have trained model A, on ...
-We have aucillery model b
+We have ancillery model b
 
 Let model a and model b infer all samples from dataset
 We can now create relationship matrix between inferences from model a and model b
@@ -60,14 +60,14 @@ if __name__ == "__main__":
     n_labels = len(inferences.keys())
     fig = plt.figure()
     fig_index = 1
-    for i, v in inferences.items():
-        print(f"truth: {i} ->")
-        n = len(v)
+    for truth, predictions in inferences.items():
+        print(f"truth: {truth} ->")
+        n = len(predictions)
         cooccurances = {}
 
         headers = []
         mat = []
-        for inference in v:
+        for inference in predictions:
             cooccur_key = "+".join([x for x in inference.values()])
             cooccurances.setdefault(cooccur_key, 0)
             cooccurances[cooccur_key] += 1
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         ax.set_xticks([i for i in range(len(headers))])
         ax.set_xticklabels(headers, rotation=-45)
         ax.set_yticks([0])
-        ax.set_yticklabels([i])
+        ax.set_yticklabels([truth])
         plt.colorbar(img)
         print("\n")
         fig_index+=1

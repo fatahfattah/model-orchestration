@@ -4,7 +4,7 @@ from orchestrator import Orchestrator
 from condition import *
 from models.cnc import CNC_net
 from models.hl import HL_net
-from models.pc import PC_net
+from models.pc_experimental import PC_net
 import time
 
 
@@ -18,26 +18,6 @@ Alternatively, we provide a path to a dataset and we take directory names as tru
 E.g.; Validation_dataset
             - Chemical
             - Nonchemical
-"""
-
-validation_program = """
-% We define our neural rules
-#external cnc(chemical;nonchemical).
-#external hl(character;chemicalstructure;drawing;flowchart;genesequence;graph;math;programlisting;table).
-#external pc(n_clusters).
-
-% If both cnc and hl infer chemical, the image is chemical
-chemicalimage :- cnc(chemical), hl(chemicalstructure).
-
-% If either cnc or hl infer non chemical, the image is not chemical
-nonchemicalimage :- cnc(nonchemical).
-nonchemicalimage :- not hl(chemicalstructure).
-
-% If there is a chemicalimage and multiple pixel clusters, we have one chemical depiction
-onechemicalstructure :- chemicalimage, pc(n_clusters) == 1.
-
-% If there is a chemicalimage and multiple pixel clusters, we have many chemical depiction
-manychemicalstructure :- chemicalimage, pc(n_clusters) > 1.
 """
 
 if __name__ == "__main__":
@@ -63,8 +43,8 @@ if __name__ == "__main__":
 
     social_structure.add_rule(Rule("chemicalimage", [PositiveCondition(cnc, "chemical"), PositiveCondition(hl, "chemicalstructure")]))
     social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cnc, "nonchemical"), NegativeCondition(hl, "chemicalstructure")]))
-    # social_structure.add_rule(Rule("onechemicalimage", [LiteralCondition("chemicalimage"), ComparisonCondition(pc, "n_clusters", "==", 1)]))
-    # social_structure.add_rule(Rule("manychemicalimage", [LiteralCondition("chemicalimage"), ComparisonCondition(pc, "n_clusters", ">", 1)]))
+    # social_structure.add_rule(Rule("onechemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "one")]))
+    # social_structure.add_rule(Rule("manychemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "many")]))
 
     orchestrator = Orchestrator(social_structure)
     print(repr(orchestrator))
