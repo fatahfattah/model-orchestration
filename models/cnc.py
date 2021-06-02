@@ -17,7 +17,7 @@ class CNC_net(Agent):
                         "classification")
 
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
-        self.model.fc = torch.nn.Linear(2048, 1000)
+        self.model.fc = torch.nn.Linear(2048, len(self.classes))
         self.model.load_state_dict(torch.load('./models/cnc.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.input_size = (299,299)
@@ -27,6 +27,13 @@ class CNC_net(Agent):
                                                  transforms.Resize(self.input_size),
                                                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                                                  ])
+        self.train_preprocessing = transforms.Compose([
+                                                transforms.ToTensor(),
+                                                transforms.Resize(self.input_size),
+                                                transforms.RandomHorizontalFlip(),
+                                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                                ])
+
 
     def infer(self, image):
         """

@@ -1,7 +1,11 @@
 import os
 import argparse 
+
 from orchestrator import Orchestrator
+from socialstructure import SocialStructure
+from rule import Rule
 from condition import *
+
 from models.cnc import CNC_net
 from models.hl import HL_net
 from models.pc_experimental import PC_net

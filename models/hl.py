@@ -18,7 +18,7 @@ class HL_net(Agent):
                         "classification")
 
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
-        self.model.fc = torch.nn.Linear(2048, 1000)
+        self.model.fc = torch.nn.Linear(2048, len(self.classes))
         self.model.load_state_dict(torch.load('./models/hl.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.input_size = (299,299)

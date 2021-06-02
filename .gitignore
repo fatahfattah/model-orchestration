@@ -1,5 +1,6 @@
 models/cnc.pth
 models/hl.pth
+*.pth
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
