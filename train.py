@@ -7,6 +7,7 @@ import numpy as np
 from dataloader import load_input, ImageFolderWithPaths
 from sklearn.model_selection import train_test_split
 import torch
+torch.manual_seed(42)
 
 import torch.optim as optim
 import torch.nn as nn
@@ -54,10 +55,10 @@ if __name__ == "__main__":
     # Filter out images according to defined filters from agent relations
     indices = np.arange(len(trainset))
     
-    filtered_indices = [i for i in indices if aucillery_agent.infer(load_input(input_type, trainset[i][2])) in filters[target_agent.classes[trainset[i][1]]]]
+    # filtered_indices = [i for i in indices if aucillery_agent.infer(load_input(input_type, trainset[i][2])) in filters[target_agent.classes[trainset[i][1]]]]
     # pickle.dump(filtered_indices, open('filtered_indices.p', 'wb'))
     # filtered_indices = pickle.load(open('filtered_indices.p', 'rb'))
-    trainset = Subset(trainset, filtered_indices)
+    # trainset = Subset(trainset, filtered_indices)
 
 
     print(f"Number of training datapoints after filter: {len(trainset)}")
