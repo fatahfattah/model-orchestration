@@ -34,7 +34,6 @@ prog4 = """
 outcome :- cnc(inference, confidence), inference == chemical, confidence == 100.
 """
 
-
 inference_program = """
 % We define our neural rules
 #external cnc(chemical;nonchemical).
@@ -54,7 +53,6 @@ onechemicalstructure :- chemicalimage, pc(n_clusters) == 1.
 % If there is a chemicalimage and multiple pixel clusters, we have many chemical depiction
 manychemicalstructure :- chemicalimage, pc(n_clusters) > 1.
 """
-
 
 ctl = clingo.Control()
 ctl.add("base", [], prog4)

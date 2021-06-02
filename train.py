@@ -1,5 +1,7 @@
 import argparse
 
+from dataloader import load_input
+from models.cnc import CNC_net
 from models.hl import HL_net
 
 """
@@ -55,5 +57,47 @@ if __name__ == "__main__":
     training_program_mapping = {"cnc": training_program}
     orchestrator = orchestrator(model_mapping)
     orchestrator.train(training_program_mapping)
+
+    """
+    From exploration we know that HL over CNC dataset:
+    chemical :- hl(programlisting) OR hl(drawing) OR hl(genesequence) or hl(chemicalstructure).
+    nonchemical :- hl(drawing) or hl(graph).
+
+    We also know that CNC over HL dataset:
+    chemicalstructure :- cnc(chemical).
+    
+    character :- cnc(nonchemical).
+    drawing :- cnc(nonchemical).
+    flowchart :- cnc(nonchemical).
+    genesequence :- cnc(nonchemical).
+    graph :- cnc(nonchemical).
+    math :- cnc(nonchemical).
+    programlisting :- cnc(nonchemical).
+    table :- cnc(nonchemical).
+
+    So now retrain cnc with hl relations as filter
+    """
+
+    input_type = 'image'
+
+    filters = {'chemical': ["programlisting", "drawing", "genesequence", "chemicalstructure"],
+               'nonchemical': ["drawing", "graph"]}
+
+    target_agent = CNC_net()
+    aucillery_agent = HL_net()
+
+    # Load dataset
+    dataset = []
+
+    # Filter dataset
+    excluded_dataset = {d for d in dataset if aucillery_agent.infer(load_input(input_type, d)) in filters[d]}
+
+    filtered_dataset = [d for d in dataset if d not in excluded_dataset]
+
+    # Train target agent on filtered dataset
+    target_agent.train(filtered_dataset)
+
+
+
 
     
