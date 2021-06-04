@@ -11,6 +11,7 @@ from rule import *
 
 from orchestrator import Orchestrator
 from models.cnc import CNC_net
+from models.cncmany import CNCMANY_net
 from models.hl import HL_net
 from models.pc_experimental import PC_net
 
@@ -35,13 +36,20 @@ if __name__ == "__main__":
     output_labels = args.o.split(',') if args.o else []
     
     social_structure = SocialStructure()
+    
     cnc = CNC_net()
+    cncmany = CNCMANY_net()
     hl = HL_net()
     pc = PC_net()
+
     social_structure.add_agent(cnc)
+    social_structure.add_agent(cncmany)
     social_structure.add_agent(hl)
     social_structure.add_agent(pc)
 
+    # social_structure.add_rule(Rule("onechemicalstructure", [PositiveCondition(cncmany, "chemical")]))
+    # social_structure.add_rule(Rule("manychemicalstructure", [PositiveCondition(cncmany, "manychemical")]))
+    # social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cncmany, "nonchemical")]))
     social_structure.add_rule(Rule("chemicalimage", [PositiveCondition(cnc, "chemical"), PositiveCondition(hl, "chemicalstructure")]))
     social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cnc, "nonchemical"), NegativeCondition(hl, "chemicalstructure")]))
     social_structure.add_rule(Rule("onechemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "one")]))

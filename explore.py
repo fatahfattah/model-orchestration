@@ -3,12 +3,15 @@ import random
 random.seed(42)
 import argparse
 
+import numpy as np
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 
 from dataloader import load_input
 from models.cnc import CNC_net
 from models.hl import HL_net
-from models.pc import PC_net
+from models.pc_experimental import PC_net
 """
 We use the orchestrator to 'explore' our dataset, trying to find relations between model outputs.
 
@@ -40,13 +43,14 @@ if __name__ == "__main__":
 
     print(f"Now we load in our nn's")
     model_mapping = {
-                    #  "cnc": CNC_net(),
+                     "cnc": CNC_net(),
                      "hl": HL_net(),
-                    #  "pc": PC_net()
+                     "pc": PC_net()
                      }
 
+    truth_labels = os.listdir(root_dir)
     inferences = {}
-    for truth_label in os.listdir(root_dir):
+    for truth_label in truth_labels:
         directory = os.path.join(root_dir, truth_label)
 
         for image in random.sample(os.listdir(directory), min(n, len(os.listdir(directory)))):
@@ -55,43 +59,37 @@ if __name__ == "__main__":
             # Initialize our inputs dictionary and process the paths into data tensors
             inputs_dict = {"image": image_path}
             inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
-            inferences.setdefault(truth_label, []).append({name:model.infer(inputs_tensor_dict[model.input_type]) for name, model in model_mapping.items()})
+
+            for name, agent in model_mapping.items():
+                inferences.setdefault(name, {})
+                inferences[name].setdefault(truth_label, [])
+                inferences[name][truth_label].append(agent.infer(inputs_tensor_dict[agent.input_type]))
     
-    n_labels = len(inferences.keys())
+
     fig = plt.figure()
     fig_index = 1
-    for truth, predictions in inferences.items():
-        print(f"truth: {truth} ->")
-        n = len(predictions)
-        cooccurances = {}
+    for name, agent in model_mapping.items():
+        agent_inferences = inferences[name]
+        classes = agent.classes
+        y_headers = list(agent_inferences.keys())
+        mat = matrelative = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
+        
+        for i, label in enumerate(y_headers):
+            for pred in agent_inferences[label]:
+                mat[i][classes.index(pred)] += 1
 
-        headers = []
-        mat = []
-        for inference in predictions:
-            cooccur_key = "+".join([x for x in inference.values()])
-            cooccurances.setdefault(cooccur_key, 0)
-            cooccurances[cooccur_key] += 1
-            
-        cooccurances = dict(sorted(cooccurances.items(), key=lambda x:x[1], reverse=True))
-        for cooccur_key, cooccur_n in cooccurances.items():
-            headers.append(cooccur_key)
-            mat.append(cooccur_n)
-            print(f"\t{cooccur_key}".ljust(20), f"n: {cooccur_n},".ljust(5), f"{round(cooccur_n/n*100, 2)}%")
-
-        # We need a 2d mat to plot
-        mat = [mat]
-        ax = fig.add_subplot(n_labels, 1, fig_index)
-        img = plt.imshow(mat, interpolation=None)
-        ax.set_xticks([i for i in range(len(headers))])
-        ax.set_xticklabels(headers, rotation=-45)
-        ax.set_yticks([0])
-        ax.set_yticklabels([truth])
-        plt.colorbar(img)
-        print("\n")
-        fig_index+=1
+        matsums = [sum(row) for row in mat]
+        for i, row in enumerate(mat):
+            for j, cell in enumerate(row):
+                if cell:
+                    matrelative[i][j] = round(cell/matsums[i]*100, 2)
+                    
+        ax = fig.add_subplot(len(model_mapping.keys()), 1, fig_index)
+        ax.set_title(agent.name)
+        sns.heatmap(matrelative, annot=True)
+        ax.set_yticklabels(y_headers, rotation = 360, va = 'center')
+        ax.set_xticklabels(classes, rotation = -45)
+        fig_index += 1
     
     fig.tight_layout()
     plt.show()
-
-    
-
