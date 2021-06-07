@@ -29,7 +29,7 @@ class SocialStructure:
         """
         self.rules.append(rule)
 
-    def infer(self, inputs_dict: dict) -> dict:
+    def infer(self, inputs_dict: dict, explore=False) -> dict:
         """Run inferences on all agents for the current input:
 
         Args:
@@ -38,6 +38,9 @@ class SocialStructure:
         Returns:
             {model_name:inference}: Key value pair dict with model_names as keys and their inference as value
         """
+        if explore:
+            return {agent.small_name:inference for agent in self.agents for inference in agent.infer(inputs_dict[agent.input_type])}
+
         return {agent.small_name:agent.infer(inputs_dict[agent.input_type]) for agent in self.agents}
 
     def to_ASP(self) -> str:

@@ -44,11 +44,13 @@ if __name__ == "__main__":
 
     print(f"Now we load in our nn's")
     model_mapping = {
-                     "cnc": CNC_net(),
+                    #  "cnc": CNC_net(),
                     #  "cncmany": CNCMANY_net(),
                      "hl": HL_net(),
-                     "pc": PC_net()
+                    #  "pc": PC_net()
                      }
+
+    target_agent = CNCMANY_net()
 
     truth_labels = os.listdir(root_dir)
     inferences = {}
@@ -63,9 +65,13 @@ if __name__ == "__main__":
             inputs_dict = {"image": image_path}
             inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
 
-            for name, agent in model_mapping.items():
-                inferences.setdefault(name, {})
-                inferences[name].setdefault(truth_label, []).append(agent.infer(inputs_tensor_dict[agent.input_type]))
+            target_agent_inference = target_agent.infer(inputs_tensor_dict[target_agent.input_type])
+            if target_agent_inference != truth_label:
+                for name, agent in model_mapping.items():
+                    inferences.setdefault(name, {})
+                    agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type], explore=True)
+                    for inf in agent_inferences:
+                        inferences[name].setdefault(truth_label, []).append(inf)
     
 
     fig = plt.figure()
@@ -73,7 +79,7 @@ if __name__ == "__main__":
     filters = {}
     for name, agent in model_mapping.items():
         agent_inferences = inferences[name]
-        classes = agent.classes
+        classes = agent.exploration_classes
         y_headers = list(agent_inferences.keys())
         mat = matrelative = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
         
@@ -90,6 +96,7 @@ if __name__ == "__main__":
                         filters.setdefault(name, {})
                         filters[name].setdefault(y_headers[i], []).append(classes[j])
 
+        y_headers = [f"(true) {l}" for l in y_headers]
         ax = fig.add_subplot(len(model_mapping.keys()), 1, fig_index)
         ax.set_title(agent.name)
         sns.heatmap(matrelative, annot=True)

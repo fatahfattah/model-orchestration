@@ -16,7 +16,6 @@ class HL_net(Agent):
                         "Classifies a patent image into nine higher level image types.",
                         "image",
                         "classification")
-
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.fc = torch.nn.Linear(2048, len(self.classes))
         self.model.load_state_dict(torch.load('./models/hl.pth', map_location=torch.device('cpu')))
@@ -29,7 +28,7 @@ class HL_net(Agent):
                                                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                                                  ])
 
-    def infer(self, image):
+    def infer(self, image, explore=False):
         """
         Parse image
         Infer
@@ -46,5 +45,8 @@ class HL_net(Agent):
             prediction = self.classes[predicted[0]]
 
 
+        if explore:
+            return [prediction, *[f"not {c}" for i, c in enumerate(self.classes) if i != predicted[0]]]
+            
         print(f"{self.small_name}: {prediction}@{confidence}")
         return prediction

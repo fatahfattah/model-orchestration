@@ -19,7 +19,7 @@ class CNCMANY_net(Agent):
 
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.fc = torch.nn.Linear(2048, len(self.classes))
-        self.model.load_state_dict(torch.load('./models/cncmany.pth', map_location=torch.device('cpu')))
+        self.model.load_state_dict(torch.load('./models/cncmany_specialized.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.input_size = (299,299)
         self.base_model = 'inception_v3'
@@ -38,7 +38,7 @@ class CNCMANY_net(Agent):
                                                 ])
 
 
-    def infer(self, image):
+    def infer(self, image, explore=False):
         """
         Parse image
         Infer
@@ -54,6 +54,8 @@ class CNCMANY_net(Agent):
             confidence = round(aux[0].item(), 2)
             prediction = self.classes[predicted[0]]
 
-
+        if explore:
+            return [prediction, *[f"not {c}" for i, c in enumerate(self.classes) if i != predicted[0]]]
+            
         print(f"{self.small_name}: {prediction}@{confidence}")
         return prediction
