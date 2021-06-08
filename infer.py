@@ -47,10 +47,10 @@ if __name__ == "__main__":
     social_structure.add_agent(hl)
     social_structure.add_agent(pc)
 
-    # social_structure.add_rule(Rule("onechemicalstructure", [PositiveCondition(cncmany, "chemical")]))
+    # social_structure.add_rule(Rule("onechemicalstructure", [PositiveCondition(cncmany, "onechemical")]))
     # social_structure.add_rule(Rule("manychemicalstructure", [PositiveCondition(cncmany, "manychemical")]))
     # social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cncmany, "nonchemical")]))
-    social_structure.add_rule(Rule("chemicalimage", [PositiveCondition(cnc, "chemical"), PositiveCondition(hl, "chemicalstructure")]))
+    social_structure.add_rule(Rule("chemicalimage", [PositiveCondition(cnc, "onechemical"), PositiveCondition(hl, "chemicalstructure")]))
     social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cnc, "nonchemical"), NegativeCondition(hl, "chemicalstructure")]))
     social_structure.add_rule(Rule("onechemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "one")]))
     social_structure.add_rule(Rule("manychemicalstructure", [LiteralCondition("chemicalimage"), PositiveCondition(pc, "many")]))

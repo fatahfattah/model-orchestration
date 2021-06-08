@@ -25,7 +25,7 @@ class Agent:
         """
         return f"#external {self.small_name}({';'.join(self.classes)})."
 
-    def infer(self, input) -> str:
+    def infer(self, input, explore=False) -> str:
         """
         Make an inference for this agent. 
 

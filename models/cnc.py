@@ -9,7 +9,7 @@ class CNC_net(Agent):
     """
 
     def __init__(self):
-        super().__init__(['chemical', 'nonchemical'],
+        super().__init__(['onechemical', 'nonchemical'],
                         "Chemical/non-chemical network",
                         "cnc",
                         "Classifies whether an image contains a chemical structure depiction",

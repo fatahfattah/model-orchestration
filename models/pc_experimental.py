@@ -19,7 +19,7 @@ class PC_net(Agent):
                          "image",
                          "clustering")
         
-    def infer(self, image):
+    def infer(self, image, explore=False):
         image = image.resize((100, 100))
         image = image.convert("L")
         image = np.array(image)
@@ -52,7 +52,8 @@ class PC_net(Agent):
             print(f"Error with cluster search: {e}")
             return 'zero'
 
-        size_threshold = 100
+        # We only keep clusters that are bigger than 20 pixels volume
+        size_threshold = 20
         clusters = dict(filter(lambda x: len(x[1]) >= size_threshold, clusters.items()))
         n = len(clusters.keys())
         print(f"n pixel clusters: {len(clusters.keys())}")
@@ -62,5 +63,8 @@ class PC_net(Agent):
             n = 'one'
         else:
             n = 'many'
+
+        if explore:
+            return [n] + [f"not {c}" for c in self.classes if c != n]
 
         return n

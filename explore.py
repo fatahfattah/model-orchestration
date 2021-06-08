@@ -44,10 +44,8 @@ if __name__ == "__main__":
 
     print(f"Now we load in our nn's")
     model_mapping = {
-                    #  "cnc": CNC_net(),
-                    #  "cncmany": CNCMANY_net(),
                      "hl": HL_net(),
-                    #  "pc": PC_net()
+                     "pc": PC_net()
                      }
 
     target_agent = CNCMANY_net()
@@ -65,19 +63,27 @@ if __name__ == "__main__":
             inputs_dict = {"image": image_path}
             inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
 
+            # If the target agent makes a wrong prediction, we will register the ancillery outputs
             target_agent_inference = target_agent.infer(inputs_tensor_dict[target_agent.input_type])
-            if target_agent_inference != truth_label:
-                for name, agent in model_mapping.items():
-                    inferences.setdefault(name, {})
-                    agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type], explore=True)
-                    for inf in agent_inferences:
-                        inferences[name].setdefault(truth_label, []).append(inf)
-    
+            for name, agent in model_mapping.items():
+                # Register inferences for current ancillery agent
+                inferences.setdefault(name, {})
+                agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type], explore=True)
+                # Regitster each inference for this true label
+                for inf in agent_inferences:
+
+                    if target_agent_inference != truth_label:
+                        inferences[name].setdefault(f"(wrong) {truth_label}", []).append(inf)
+                    else:
+                        inferences[name].setdefault(f"(correct) {truth_label}", []).append(inf)
 
     fig = plt.figure()
     fig_index = 1
     filters = {}
     for name, agent in model_mapping.items():
+        if not name in inferences:
+            continue
+
         agent_inferences = inferences[name]
         classes = agent.exploration_classes
         y_headers = list(agent_inferences.keys())
@@ -96,14 +102,19 @@ if __name__ == "__main__":
                         filters.setdefault(name, {})
                         filters[name].setdefault(y_headers[i], []).append(classes[j])
 
-        y_headers = [f"(true) {l}" for l in y_headers]
         ax = fig.add_subplot(len(model_mapping.keys()), 1, fig_index)
         ax.set_title(agent.name)
         sns.heatmap(matrelative, annot=True)
-        ax.set_yticklabels(y_headers, rotation = 360, va = 'center')
+        ax.set_yticklabels([l for l in y_headers], 
+                            rotation = 360, 
+                            va = 'center')
+                            
         ax.set_xticklabels(classes, rotation = -45)
         fig_index += 1
     
-    print(f"We have found the following possible filters: {filters}")
+    print(f"We have found the following possible filters:")
+    for name, fs in filters.items():
+        print(f"agent:{name} -> {fs}")
+
     fig.tight_layout()
     plt.show()

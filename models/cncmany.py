@@ -10,7 +10,7 @@ class CNCMANY_net(Agent):
     """
 
     def __init__(self):
-        super().__init__(['chemical', 'manychemical' ,'nonchemical'],
+        super().__init__(['onechemical', 'manychemical' ,'nonchemical'],
                         "Chemical/non-chemical/many-chemical network",
                         "cncmany",
                         "Classifies whether an image contains a chemical structure depiction",
@@ -19,7 +19,7 @@ class CNCMANY_net(Agent):
 
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.fc = torch.nn.Linear(2048, len(self.classes))
-        self.model.load_state_dict(torch.load('./models/cncmany_specialized.pth', map_location=torch.device('cpu')))
+        self.model.load_state_dict(torch.load('./models/cncmany_nonspecialized.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.input_size = (299,299)
         self.base_model = 'inception_v3'
