@@ -38,7 +38,7 @@ class CNCMANY_net(Agent):
                                                 ])
 
 
-    def infer(self, image, explore=False):
+    def infer(self, image):
         """
         Parse image
         Infer
@@ -54,8 +54,5 @@ class CNCMANY_net(Agent):
             confidence = round(aux[0].item(), 2)
             prediction = self.classes[predicted[0]]
 
-        if explore:
-            return [prediction, *[f"not {c}" for i, c in enumerate(self.classes) if i != predicted[0]]]
-            
         print(f"{self.small_name}: {prediction}@{confidence}")
         return prediction

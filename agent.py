@@ -10,7 +10,6 @@ class Agent:
 
     def __init__(self, classes, name, small_name, description, input_type, inference_type):
         self.classes = classes
-        self.exploration_classes = classes + [f"not {c}" for c in classes]
         self.name = name
         self.small_name = small_name
         self.description = description

@@ -68,10 +68,9 @@ if __name__ == "__main__":
             for name, agent in model_mapping.items():
                 # Register inferences for current ancillery agent
                 inferences.setdefault(name, {})
-                agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type], explore=True)
+                agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type])
                 # Regitster each inference for this true label
-                for inf in agent_inferences:
-
+                for inf in agent_inferences if isinstance(agent_inferences, list) else [agent_inferences]:
                     if target_agent_inference != truth_label:
                         inferences[name].setdefault(f"(wrong) {truth_label}", []).append(inf)
                     else:
@@ -85,7 +84,7 @@ if __name__ == "__main__":
             continue
 
         agent_inferences = inferences[name]
-        classes = agent.exploration_classes
+        classes = agent.classes
         y_headers = list(agent_inferences.keys())
         mat = matrelative = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
         

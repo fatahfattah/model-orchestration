@@ -64,7 +64,4 @@ class PC_net(Agent):
         else:
             n = 'many'
 
-        if explore:
-            return [n] + [f"not {c}" for c in self.classes if c != n]
-
         return n
