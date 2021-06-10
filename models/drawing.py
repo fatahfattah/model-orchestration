@@ -5,15 +5,15 @@ from agent import Agent
 
 class DRAWING_net(Agent):
     """
-    (Negative) Not drawing/ not not drawing network
-    Predict whether an image has not depicted a drawing.
+    Drawing/not drawing network
+    Predict whether an image has depicted a drawing.
     """
 
     def __init__(self):
-        super().__init__(['not_drawing', 'not_not_drawing'],
-                        "(Negative) Not drawing/ not not drawing network",
-                        "not_drawing",
-                        "Predict whether an image has not depicted a drawing.",
+        super().__init__(['drawing', 'not_drawing'],
+                        "Drawing/not drawing network",
+                        "drawing",
+                        "Predict whether an image has depicted a drawing.",
                         "image",
                         "classification")
 

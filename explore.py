@@ -15,6 +15,9 @@ from models.hl import HL_net
 from models.drawing import DRAWING_net
 from models.not_drawing import NOTDRAWING_net
 from models.pc_experimental import PC_net
+
+from ranking import Ranking, rank_grouped_rankings
+
 """
 We use the orchestrator to 'explore' our dataset, trying to find relations between model outputs.
 
@@ -73,7 +76,7 @@ if __name__ == "__main__":
                 # Register inferences for current ancillery agent
                 inferences.setdefault(name, {})
                 agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type])
-                # Regitster each inference for this true label
+                # Register each inference for this true label
                 for inf in agent_inferences if isinstance(agent_inferences, list) else [agent_inferences]:
                     if target_agent_inference != truth_label:
                         inferences[name].setdefault(f"(wrong) {truth_label}", []).append(inf)
@@ -84,7 +87,6 @@ if __name__ == "__main__":
     fig_index = 1
     filters = {}
     rankings = []
-
     for name, agent in model_mapping.items():
         if not name in inferences:
             continue
@@ -94,16 +96,6 @@ if __name__ == "__main__":
         y_headers = list(agent_inferences.keys())
         mat = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
         matrelative = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
-        
-        """
-        agent:drawing -> {'(correct) nonchemical': ['not_drawing', 'not_not_drawing'], '(wrong) nonchemical': ['not_drawing'], 
-                        '(correct) manychemical': ['not_drawing', 'not_not_drawing'], '(wrong) manychemical': ['not_drawing', 'not_not_drawing'], 
-                        '(wrong) onechemical': ['not_drawing', 'not_not_drawing'], '(correct) onechemical': ['not_drawing', 'not_not_drawing']}
-
-        agent:not_drawing -> {'(correct) nonchemical': ['drawing', 'not_drawing'], '(wrong) nonchemical': ['not_drawing'], 
-                            '(correct) manychemical': ['drawing'], '(wrong) manychemical': ['drawing'], 
-                            '(wrong) onechemical': ['drawing'], '(correct) onechemical': ['drawing', 'not_drawing']}
-        """
 
         # Register the amount of hits for each true_label (correct/wrong) combination with ancillery output
         for i, label in enumerate(y_headers):
@@ -118,25 +110,16 @@ if __name__ == "__main__":
                     if matrelative[i][j] >= 0.1:
                         filters.setdefault(name, {})
                         filters[name].setdefault(y_headers[i], []).append(classes[j])
-        
-        def max_wrong_correct(wrong: int, correct: int) -> float:
-            return wrong-correct
-
-
-        def min_rank(rank_wrong:int, rank_correct: int) -> float:
-            return min(rank_wrong//rank_correct)
 
         for i, c in enumerate(classes):
             for t in truth_labels:
                 wrong_i = y_headers.index(f"(wrong) {t}") if f"(wrong) {t}" in y_headers else None
+                wrong_ratio = matrelative[wrong_i][i] if wrong_i != None else 0
+                wrong_n = mat[wrong_i][i] if wrong_i != None else 0
                 correct_i = y_headers.index(f"(correct) {t}") if f"(correct) {t}" in y_headers else None
-                if wrong_i and correct_i:
-                    print(f"{t}->")
-                    wrong_ratio = matrelative[wrong_i][i]
-                    correct_ratio = matrelative[correct_i][i]
-                    max_wrong_correct_rank = max_wrong_correct(wrong_ratio, correct_ratio)
-                    rankings.append([t, max_wrong_correct])
-                    print(f"\twrong ratio: {wrong_ratio}, correct ratio: {correct_ratio}, rank (max_wrong_correct): {max_wrong_correct_rank}")
+                correct_ratio = matrelative[correct_i][i] if correct_i != None else 0
+                correct_n = mat[correct_i][i] if correct_i != None else 0
+                rankings.append(Ranking(t, name, c, wrong_n, correct_n, wrong_ratio, correct_ratio, wrong_ratio-correct_ratio))
 
         ax = fig.add_subplot(len(model_mapping.keys()), 1, fig_index)
         ax.set_title(agent.name)
@@ -148,9 +131,26 @@ if __name__ == "__main__":
         ax.set_xticklabels(classes, rotation = -45)
         fig_index += 1
     
-    print(f"We have found the following possible filters:")
-    for name, fs in filters.items():
-        print(f"agent:{name} -> {fs}")
+    fig.tight_layout()
+    # plt.show()
+
+    fig = plt.figure()
+    fig_index = 1
+    for t in truth_labels:
+        grouped_rankings = [r for r in rankings if r.target_label == t]
+        rank_grouped_rankings(grouped_rankings)
+        print(f"Relations for {t} -> ")
+        for r in grouped_rankings:
+            print(r)
+        
+        ax = fig.add_subplot(len(truth_labels), 1, fig_index)
+        ax.set_title(f"Rankings for: {t}")
+        y_headers = [f"{r.ancillery_agent}({r.ancillery_label})" for r in grouped_rankings]
+        rankings_mat = [r.to_mat() for r in grouped_rankings]
+        sns.heatmap(rankings_mat, annot=True)
+        ax.set_yticklabels([l for l in y_headers], rotation=360, va='center')
+        ax.set_xticklabels([l for l in ['correct_rank', 'wrong_rank', 'wrong_minus_correct_rank', 'wc_ranking_rank']])
+        fig_index += 1
 
     fig.tight_layout()
     plt.show()
