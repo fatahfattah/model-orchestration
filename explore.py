@@ -12,6 +12,8 @@ from dataloader import load_input
 from models.cnc import CNC_net
 from models.cncmany import CNCMANY_net
 from models.hl import HL_net
+from models.drawing import DRAWING_net
+from models.not_drawing import NOTDRAWING_net
 from models.pc_experimental import PC_net
 """
 We use the orchestrator to 'explore' our dataset, trying to find relations between model outputs.
@@ -44,8 +46,10 @@ if __name__ == "__main__":
 
     print(f"Now we load in our nn's")
     model_mapping = {
-                     "hl": HL_net(),
-                     "pc": PC_net()
+                    #  "hl": HL_net(),
+                     "drawing": DRAWING_net(),
+                     "not_drawing": NOTDRAWING_net(),
+                    #  "pc": PC_net()
                      }
 
     target_agent = CNCMANY_net()

@@ -3,23 +3,23 @@ import torchvision.transforms as transforms
 from torchvision.transforms.transforms import RandomAdjustSharpness
 from agent import Agent
 
-class CNCMANY_net(Agent):
+class NOTDRAWING_net(Agent):
     """
-    Chemical/non-chemical/Many-chemical (CNC) network
-    Predict whether an image contains a chemical structure or not.
+    Drawing/not drawing network
+    Predict whether an image has depicted a drawing.
     """
 
     def __init__(self):
-        super().__init__(['onechemical', 'manychemical' ,'nonchemical'],
-                        "Chemical/non-chemical/many-chemical network",
-                        "cncmany",
-                        "Classifies whether an image contains a chemical structure depiction",
+        super().__init__(['drawing', 'not_drawing'],
+                        "Drawing/not drawing network",
+                        "drawing",
+                        "Predict whether an image has depicted a drawing.",
                         "image",
                         "classification")
 
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.fc = torch.nn.Linear(2048, len(self.classes))
-        self.model.load_state_dict(torch.load('./models/cncmany_specialized.pth', map_location=torch.device('cpu')))
+        self.model.load_state_dict(torch.load('./models/not_drawing.pth', map_location=torch.device('cpu')))
         self.model.eval()
         self.input_size = (299,299)
         self.base_model = 'inception_v3'
