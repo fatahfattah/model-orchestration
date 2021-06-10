@@ -149,7 +149,7 @@ if __name__ == "__main__":
         rankings_mat = [r.to_mat() for r in grouped_rankings]
         sns.heatmap(rankings_mat, annot=True)
         ax.set_yticklabels([l for l in y_headers], rotation=360, va='center')
-        ax.set_xticklabels([l for l in ['correct_rank', 'wrong_rank', 'wrong_minus_correct_rank', 'wc_ranking_rank']])
+        ax.set_xticklabels([l for l in ['correct_rank', 'wrong_rank', 'wrong_minus_correct_rank', 'wc_ranking_rank',  'relative_n_rank', 'relative_rank_rank']])
         fig_index += 1
 
     fig.tight_layout()
