@@ -1,12 +1,18 @@
 
+from models.not_drawing import NOTDRAWING_net
+from models.drawing import DRAWING_net
 from tqdm import tqdm
 import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 import pickle
+from collections import Counter
+from shutil import copy
+import os
 
 import torch
 import torch.optim as optim
@@ -19,6 +25,8 @@ from torch.utils.data import DataLoader, Subset
 from dataloader import load_input, ImageFolderWithPaths
 from models.cncmany import CNCMANY_net
 from models.hl import HL_net
+from models.drawing import DRAWING_net
+from models.not_drawing import NOTDRAWING_net
 
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -27,51 +35,15 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 Program to (Re-)train models in a network with a meta-level filter using explicit rules based on the output of the models in our network
 """
 
-if __name__ == "__main__":
-    input_type = 'image'
 
-    filters = {'chemical': ['chemicalstructure', 'drawing', 'programlisting'], 
-                'manychemical': ['drawing', 'genesequence', 'programlisting'], 
-                'nonchemical': ['drawing', 'graph']}
-
-    target_agent = CNCMANY_net()
-    aucillery_agent = HL_net()
-
-    image_size = (299, 299)
-    batch_size = 8
-    data_dir = '/home/fatah/Desktop/cnc_subset'
-
-    # Load dataset
-    dataset = ImageFolderWithPaths(data_dir,
-                                                transform=target_agent.train_preprocessing)
-
-    indices = np.arange(len(dataset))
-    # Train/test split
-    train_indices, test_indices = train_test_split(indices, 
-                                            train_size = int(len(dataset)//len(dataset.targets)*0.8*len(dataset.targets)), 
-                                            test_size = int(len(dataset)//len(dataset.targets)*0.2*len(dataset.targets)), 
-                                            stratify = dataset.targets)
-    
-
-    # Make train/test subsets
-    trainset = Subset(dataset, train_indices)
-    testset = Subset(dataset, test_indices)
-    # Filter out images according to defined filters from agent relations
-    indices = np.arange(len(trainset))
-    
-    filtered_indices = [i for i in tqdm(indices) if aucillery_agent.infer(load_input(input_type, trainset[i][2])) in filters[target_agent.classes[trainset[i][1]]]]
-    # pickle.dump(filtered_indices, open('filtered_indices_7k_0706.p', 'wb'))
-    # filtered_indices = pickle.load(open('filtered_indices_7k_0706.p', 'rb'))
-    trainset = Subset(trainset, filtered_indices)
-
-
-    print(f"Number of training datapoints after filter: {len(trainset)}")
+def specialized_train(trainset, testset, path, modelname):
+    """
+    Train a neural network on a specialized dataset, saves it to modelname at given path
+    """
 
     #Instantiate torch data loaders
     train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
     test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False)
-
-    classes = target_agent.classes
 
     # Choose cuda if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -107,7 +79,7 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
             running_loss += loss.item() * inputs.size(0)
-            if i % 100 == 99:    # print every 2000 mini-batches
+            if i % 100 == 99:    # print every 100 mini-batches
                 print('[%d, %5d] loss: %.3f' %
                     (epoch + 1, i + 1, running_loss / 100))
         
@@ -142,10 +114,111 @@ if __name__ == "__main__":
 
     
     # # Save trained model to storage
-    PATH = './models/cnc_nonspecialized.pth'
+    PATH = f'{path}/{modelname}.pth'
     torch.save(model.state_dict(), PATH)
 
-    import matplotlib.pyplot as plt
+    return (training_losses, validation_losses)
+
+if __name__ == "__main__":
+    input_type = 'image'
+
+    target_agent = CNCMANY_net()
+    drawing = DRAWING_net()
+    not_drawing = NOTDRAWING_net()
+
+    image_size = (299, 299)
+    batch_size = 8
+    data_dir = "/home/fatah/Desktop/cnc_subset"
+    dest_dir = "/home/fatah/Desktop/filtered_validation_relative_rank"
+    model_identifier = "cncmany_drawingfilter_relative_rank"
+    model_save_path = "./models/"
+    with_filter = True
+
+    # Load dataset
+    dataset = ImageFolderWithPaths(data_dir, transform=target_agent.train_preprocessing)
+
+    classes = dataset.classes
+
+    indices = np.arange(len(dataset))
+    # Train/test split
+    train_indices, test_indices = train_test_split(indices, 
+                                            train_size = int(len(dataset)//len(dataset.targets)*0.8*len(dataset.targets)), 
+                                            test_size = int(len(dataset)//len(dataset.targets)*0.2*len(dataset.targets)), 
+                                            stratify = dataset.targets)
+    
+
+    # Make train/test subsets
+    trainset = Subset(dataset, train_indices)
+    testset = Subset(dataset, test_indices)
+
+    filters = {
+		'manychemical': [drawing, 'drawing'],
+		'onechemical': [not_drawing, 'not_not_drawing'],
+		'nonchemical': [not_drawing, 'not_drawing']
+    }
+
+    # Filter out images according to defined filters from agent relations
+    indices = np.arange(len(trainset))
+
+    # # We try to filter out indices that are not in our filters
+    # filtered_indices = []
+    # for i in tqdm(indices):
+    #     # Retrieve the class label from the trainset
+    #     truth_label =  classes[trainset[i][1]]
+
+    #     # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
+    #     if  filters[truth_label][0].infer(load_input(input_type, trainset[i][2])) == filters[truth_label][1]:
+    #         filtered_indices.append(i)
+
+    # pickle.dump(filtered_indices, open('filtered_indices_3.p', 'wb'))
+    filtered_indices = pickle.load(open('filtered_indices.p', 'rb'))
+    negative_filtered_indices = [i for i in indices if i not in filtered_indices]
+
+    negative_trainset = Subset(trainset, negative_filtered_indices)
+    positive_trainset = Subset(trainset, filtered_indices)
+
+    print(f"Number of training datapoints after filter: {len(positive_trainset)}")
+    print(Counter([classes[dataset.targets[i]] for i in filtered_indices]))
+
+    # Filter out images according to defined filters from agent relations
+    indices = np.arange(len(testset))
+    
+    # # We try to filter out indices that are not in our filters
+    filtered_indices = []
+    negative_filtered_indices = []
+    for i in tqdm(indices):
+        # Retrieve the class label from the testset
+        truth_label =  classes[testset[i][1]]
+        input_path = testset[i][2]
+        # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
+        if  filters[truth_label][0].infer(load_input(input_type, input_path)) == filters[truth_label][1]:
+            filtered_indices.append(i)
+            copy(input_path, os.path.join(dest_dir, truth_label))
+        else:
+            negative_filtered_indices.append(i)
+            copy(input_path, os.path.join(f"{dest_dir}_negative", truth_label))
+
+    negative_testset = Subset(testset, negative_filtered_indices)
+    positive_testset = Subset(testset, filtered_indices)
+    
+    print(f"Number of training datapoints after filter: {len(positive_trainset)}")
+    print(Counter([classes[dataset.targets[i]] for i in filtered_indices]))
+
+    # We train on the filtered data
+    training_losses, validation_losses = specialized_train(positive_trainset, positive_testset, model_save_path, model_identifier) 
+    plt.figure()
+    plt.plot(training_losses)
+
+    plt.figure()
+    for name, loss in validation_losses.items():
+        plt.plot(loss)
+
+
+    print(f"Number of training datapoints after filter: {len(negative_testset)}")
+    print(Counter([classes[dataset.targets[i]] for i in negative_filtered_indices]))
+
+    # We train the negative version of the specialized classifier
+    training_losses, validation_losses = specialized_train(negative_trainset, negative_testset, model_save_path, f"negative_{model_identifier}")
     plt.figure()
     plt.plot(training_losses)
 

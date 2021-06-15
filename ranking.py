@@ -21,7 +21,7 @@ class Ranking:
     relative_rank_rank: float = float('inf')
 
     def to_mat(self):
-        return [self.correct_rank, self.wrong_rank, self.wrong_minus_correct_rank, self.wc_rank, self.relative_n_rank, self.relative_rank_rank]
+        return [self.correct_n, self.wrong_n, self.correct_rank, self.wrong_rank, self.wrong_minus_correct_rank, self.wc_rank, self.relative_n_rank, self.relative_rank_rank]
 
     def set_correct_rank(self, i):
         self.correct_rank = i
@@ -38,16 +38,16 @@ class Ranking:
     # [wrong * n_wrong - correct * n_correct]/[n_wrong + n_correct]
     def set_relative_n_rank(self):
         try:
-            self.relative_n_rank = (self.wrong_ratio * self.wrong_n - self.correct_ratio * self.correct_n) // (self.wrong_n + self.correct_n)
+            self.relative_n_rank = (self.wrong_ratio * self.wrong_n - self.correct_ratio * self.correct_n) / (self.wrong_n + self.correct_n)
         except ZeroDivisionError as e:
             self.relative_n_rank = float('inf')
 
     # [rank wrong/rank correct] * [n_wrong + n_correct]/n_wrong
     def set_relative_rank_rank(self):
         try:
-            self.relative_rank_rank = (self.wrong_rank // self.correct_rank) * (self.wrong_n + self.correct_n) // self.wrong_n
+            self.relative_rank_rank = (self.wrong_rank / self.correct_rank * self.wrong_n + self.correct_n) / self.wrong_n
         except ZeroDivisionError as e:
-            self.relative_n_rank = float('inf')
+            self.relative_rank_rank = float('inf')
 
 def rank_grouped_rankings(rankings):
     rankings.sort(key=lambda x:x.correct_ratio, reverse=True)

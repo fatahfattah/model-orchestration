@@ -49,6 +49,7 @@ if __name__ == "__main__":
 
     print(f"Now we load in our nn's")
     model_mapping = {
+                    # "cnc": CNCMANY_net()
                     #  "hl": HL_net(),
                      "drawing": DRAWING_net(),
                      "not_drawing": NOTDRAWING_net(),
@@ -132,7 +133,6 @@ if __name__ == "__main__":
         fig_index += 1
     
     fig.tight_layout()
-    # plt.show()
 
     fig = plt.figure()
     fig_index = 1
@@ -149,7 +149,10 @@ if __name__ == "__main__":
         rankings_mat = [r.to_mat() for r in grouped_rankings]
         sns.heatmap(rankings_mat, annot=True)
         ax.set_yticklabels([l for l in y_headers], rotation=360, va='center')
-        ax.set_xticklabels([l for l in ['correct_rank', 'wrong_rank', 'wrong_minus_correct_rank', 'wc_ranking_rank',  'relative_n_rank', 'relative_rank_rank']])
+        ax.set_xticklabels([l for l in ['correct_n', 'wrong_n', 
+                                        'correct_rank', 'wrong_rank', 'wrong_minus_correct_rank', 
+                                        'wc_ranking_rank',  'relative_n_rank', 'relative_rank_rank']],
+                                        rotation=-15)
         fig_index += 1
 
     fig.tight_layout()
