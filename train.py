@@ -1,4 +1,5 @@
 
+from torchvision import transforms
 from models.not_drawing import NOTDRAWING_net
 from models.drawing import DRAWING_net
 from tqdm import tqdm
@@ -36,14 +37,14 @@ Program to (Re-)train models in a network with a meta-level filter using explici
 """
 
 
-def specialized_train(trainset, testset, path, modelname):
+def specialized_train(trainset, testset, path, modelname, train_transforms, test_transforms):
     """
     Train a neural network on a specialized dataset, saves it to modelname at given path
     """
 
     #Instantiate torch data loaders
-    train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False)
+    train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True, transform=train_transforms)
+    test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False, transform=test_transforms)
 
     # Choose cuda if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     with_filter = True
 
     # Load dataset
-    dataset = ImageFolderWithPaths(data_dir, transform=target_agent.train_preprocessing)
+    dataset = ImageFolderWithPaths(data_dir)
 
     classes = dataset.classes
 
@@ -160,25 +161,25 @@ if __name__ == "__main__":
     # Filter out images according to defined filters from agent relations
     indices = np.arange(len(trainset))
 
-    # # We try to filter out indices that are not in our filters
-    # filtered_indices = []
-    # for i in tqdm(indices):
-    #     # Retrieve the class label from the trainset
-    #     truth_label =  classes[trainset[i][1]]
+    # We try to filter out indices that are not in our filters
+    filtered_indices = []
+    negative_filtered_indices = []
+    for i in tqdm(indices):
+        # Retrieve the class label from the trainset
+        truth_label =  classes[trainset[i][1]]
 
-    #     # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
-    #     if  filters[truth_label][0].infer(load_input(input_type, trainset[i][2])) == filters[truth_label][1]:
-    #         filtered_indices.append(i)
+        # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
+        if  filters[truth_label][0].infer(load_input(input_type, trainset[i][2])) == filters[truth_label][1]:
+            filtered_indices.append(i)
+        else:
+            negative_filtered_indices.append(i)
 
-    # pickle.dump(filtered_indices, open('filtered_indices_3.p', 'wb'))
-    filtered_indices = pickle.load(open('filtered_indices.p', 'rb'))
-    negative_filtered_indices = [i for i in indices if i not in filtered_indices]
+    pickle.dump(filtered_indices, open('filtered_indices_postive.p', 'wb'))
+    pickle.dump(negative_filtered_indices, open('filtered_indices_negative.p', 'wb'))
+    # filtered_indices = pickle.load(open('filtered_indices.p', 'rb'))
 
     negative_trainset = Subset(trainset, negative_filtered_indices)
     positive_trainset = Subset(trainset, filtered_indices)
-
-    print(f"Number of training datapoints after filter: {len(positive_trainset)}")
-    print(Counter([classes[dataset.targets[i]] for i in filtered_indices]))
 
     # Filter out images according to defined filters from agent relations
     indices = np.arange(len(testset))
@@ -198,6 +199,10 @@ if __name__ == "__main__":
             negative_filtered_indices.append(i)
             copy(input_path, os.path.join(f"{dest_dir}_negative", truth_label))
 
+
+    pickle.dump(filtered_indices, open('filtered_indices_test_postive.p', 'wb'))
+    pickle.dump(negative_filtered_indices, open('filtered_indices_test_negative.p', 'wb'))
+
     negative_testset = Subset(testset, negative_filtered_indices)
     positive_testset = Subset(testset, filtered_indices)
     
@@ -205,7 +210,12 @@ if __name__ == "__main__":
     print(Counter([classes[dataset.targets[i]] for i in filtered_indices]))
 
     # We train on the filtered data
-    training_losses, validation_losses = specialized_train(positive_trainset, positive_testset, model_save_path, model_identifier) 
+    training_losses, validation_losses = specialized_train(positive_trainset
+                                                         ,positive_testset
+                                                         ,model_save_path
+                                                         ,model_identifier
+                                                         ,target_agent.train_preprocessing
+                                                         ,target_agent.preprocessing) 
     plt.figure()
     plt.plot(training_losses)
 
@@ -214,11 +224,16 @@ if __name__ == "__main__":
         plt.plot(loss)
 
 
-    print(f"Number of training datapoints after filter: {len(negative_testset)}")
+    print(f"Number of training datapoints after filter: {len(negative_trainset)}")
     print(Counter([classes[dataset.targets[i]] for i in negative_filtered_indices]))
 
     # We train the negative version of the specialized classifier
-    training_losses, validation_losses = specialized_train(negative_trainset, negative_testset, model_save_path, f"negative_{model_identifier}")
+    training_losses, validation_losses = specialized_train(negative_trainset
+                                                        , negative_testset
+                                                        , model_save_path
+                                                        , f"negative_{model_identifier}"
+                                                        ,target_agent.train_preprocessing
+                                                        ,target_agent.preprocessing)
     plt.figure()
     plt.plot(training_losses)
 

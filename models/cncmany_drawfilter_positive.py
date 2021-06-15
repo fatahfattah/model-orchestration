@@ -3,23 +3,27 @@ import torchvision.transforms as transforms
 from torchvision.transforms.transforms import RandomAdjustSharpness
 from agent import Agent
 
-class NOTDRAWING_net(Agent):
+class CNCMANY_DRAWFILTER_POSITIVE_net(Agent):
     """
-    (Negative) Not drawing/ not not drawing network
-    Predict whether an image has not depicted a drawing.
+    Chemical/non-chemical/many-chemical network specialized with drawingfilter (CNC)(positive) network
+    Predict whether an image contains a chemical structure or not.
     """
 
     def __init__(self):
-        super().__init__(['not_drawing', 'not_not_drawing'],
-                        "(Negative) Not drawing/ not not drawing network",
-                        "not_drawing",
-                        "Predict whether an image has not depicted a drawing.",
+        super().__init__(['manychemical', 'nonchemical', 'onechemical'],
+                        "Chemical/non-chemical/many-chemical network specialized with drawingfilter (positive)",
+                        "cncmany_drawfilter_positive",
+                        "Classifies whether an image contains a chemical structure depiction",
                         "image",
                         "classification")
 
+        
         self.model = torch.hub.load('pytorch/vision:v0.9.0', 'inception_v3', pretrained=False)
         self.model.fc = torch.nn.Linear(2048, len(self.classes))
-        self.model.load_state_dict(torch.load('./models/not_drawing.pth', map_location=torch.device('cpu')))
+        try:
+            self.model.load_state_dict(torch.load('./models/cncmany_drawingfilter_relative_rank.pth', map_location=torch.device('cpu')))
+        except FileNotFoundError as e:
+            print(f"ERROR: make sure that the model exists if you want to use {self.small_name} for inferences")
         self.model.eval()
         self.input_size = (299,299)
         self.base_model = 'inception_v3'
