@@ -1,3 +1,4 @@
+from models.cncmany import CNCMANY_net
 import os
 import argparse
 
@@ -32,26 +33,6 @@ E.g.; Validation_dataset
             - Nonchemical
 """
 
-"""
-#external drawing(drawing;not_drawing).
-#external not_drawing(not_drawing;not_not_drawing).
-#external cncmany_drawfilter_positive(manychemical;nonchemical;onechemical);
-#external cncmany_drawfilter_negative(manychemical;nonchemical;onechemical);
-
-manychemical_drawfilter :- drawing(drawing).
-nonchemical_drawfilter :- not_drawing(not_not_drawing).
-onechemical_drawfilter :- not_drawing(not_drawing).
-
-manychemical :- cncmany_drawfilter_positive(manychemical), manychemical_drawfilter.
-nonchemical :- cncmany_drawfilter_positive(nonchemical), nonchemical_drawfilter.
-onechemical :- cncmany_drawfilter_positive(onechemical), onechemical_drawfilter.
-
-manychemical :- cncmany_drawfilter_negative(manychemical), not manychemical_drawfilter.
-nonchemical :- cncmany_drawfilter_negative(nonchemical), not nonchemical_drawfilter.
-onechemical :- cncmany_drawfilter_negative(onechemical), not onechemical_drawfilter.
-"""
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-directory", help="Please provide the path to the directory that contains the validation data.")
@@ -64,65 +45,81 @@ if __name__ == "__main__":
     print(f"We will start validation...\n\tDirectory: {directory}")
 
     social_structure = SocialStructure()
+    cncmany = CNCMANY_net()
     cncmany_drawfilter_positive = CNCMANY_DRAWFILTER_POSITIVE_net()
     cncmany_drawfilter_negative = CNCMANY_DRAWFILTER_NEGATIVE_net()
     drawing = DRAWING_net()
     not_drawing = NOTDRAWING_net()
 
+    social_structure.add_agent(cncmany)
     social_structure.add_agent(cncmany_drawfilter_positive)
     social_structure.add_agent(cncmany_drawfilter_negative)
     social_structure.add_agent(drawing)
     social_structure.add_agent(not_drawing)
 
     # Add our filtering rules
-    social_structure.add_rule(Rule("manychemical_drawfilter", [PositiveCondition(drawing, "drawing")]))
-    social_structure.add_rule(Rule("nonchemical_drawfilter", [PositiveCondition(not_drawing, "not_not_drawing")]))
-    social_structure.add_rule(Rule("onechemical_drawfilter", [PositiveCondition(not_drawing, "not_drawing")]))
+    social_structure.add_rule(Rule("filter_many", [PositiveCondition(drawing, "drawing")]))
+    social_structure.add_rule(Rule("filter_none", [PositiveCondition(not_drawing, "not_not_drawing")]))
+    social_structure.add_rule(Rule("filter_one", [PositiveCondition(not_drawing, "not_drawing")]))
 
-    social_structure.add_rule(Rule("manychemical", [PositiveCondition(cncmany_drawfilter_positive, "manychemical"), LiteralCondition("manychemical_drawfilter")]))
-    social_structure.add_rule(Rule("nonchemical", [PositiveCondition(cncmany_drawfilter_positive, "nonchemical"), LiteralCondition("nonchemical_drawfilter")]))
-    social_structure.add_rule(Rule("onechemical", [PositiveCondition(cncmany_drawfilter_positive, "onechemical"), LiteralCondition("onechemical_drawfilter")]))
+    social_structure.add_rule(Rule("positive_manychemical", [PositiveCondition(cncmany_drawfilter_positive, "manychemical"), LiteralCondition("filter_many")]))
+    social_structure.add_rule(Rule("positive_nonchemical", [PositiveCondition(cncmany_drawfilter_positive, "nonchemical"), LiteralCondition("filter_none")]))
+    social_structure.add_rule(Rule("positive_onechemical", [PositiveCondition(cncmany_drawfilter_positive, "onechemical"), LiteralCondition("filter_one")]))
 
-    social_structure.add_rule(Rule("manychemical", [PositiveCondition(cncmany_drawfilter_negative, "manychemical"), LiteralCondition("not manychemical_drawfilter")]))
-    social_structure.add_rule(Rule("nonchemical", [PositiveCondition(cncmany_drawfilter_negative, "nonchemical"), LiteralCondition("not nonchemical_drawfilter")]))
-    social_structure.add_rule(Rule("onechemical", [PositiveCondition(cncmany_drawfilter_negative, "onechemical"), LiteralCondition("not onechemical_drawfilter")]))
+    social_structure.add_rule(Rule("negative_manychemical", [PositiveCondition(cncmany_drawfilter_negative, "manychemical")
+                                                            , LiteralCondition("not positive_manychemical")
+                                                            , LiteralCondition("not positive_nonchemical")
+                                                            , LiteralCondition("not positive_onechemical")]))
+
+    social_structure.add_rule(Rule("negative_nonchemical", [PositiveCondition(cncmany_drawfilter_negative, "nonchemical")
+                                                            , LiteralCondition("not positive_manychemical")
+                                                            , LiteralCondition("not positive_nonchemical")
+                                                            , LiteralCondition("not positive_onechemical")]))
+
+    social_structure.add_rule(Rule("negative_onechemical", [PositiveCondition(cncmany_drawfilter_negative, "onechemical")
+                                                            , LiteralCondition("not positive_manychemical")
+                                                            , LiteralCondition("not positive_nonchemical")
+                                                            , LiteralCondition("not positive_onechemical")]))
+
+    social_structure.add_rule(Rule("manychemical", [LiteralCondition("positive_manychemical")]))
+    social_structure.add_rule(Rule("manychemical", [LiteralCondition("negative_manychemical")]))
+
+    social_structure.add_rule(Rule("nonchemical", [LiteralCondition("positive_nonchemical")]))
+    social_structure.add_rule(Rule("nonchemical", [LiteralCondition("negative_nonchemical")]))
+
+    social_structure.add_rule(Rule("onechemical", [LiteralCondition("positive_onechemical")]))
+    social_structure.add_rule(Rule("onechemical", [LiteralCondition("negative_onechemical")]))
+
 
 
     orchestrator = Orchestrator(social_structure)
     print(repr(orchestrator))
 
-    # start_time = time.time()
-    # precision, recall, accuracy, f1 = orchestrator.validate(directory, truth_label, n)
-
-    # end_time = time.time()
-    # print(f"Validation took: {round(end_time-start_time, 3)}s")
-
-    """
-    Give a directory
-    outs = []
-    labels = []
-    """
+    start_time = time.time()
 
     classes = os.listdir(directory)
     mat = [[0 for i in range(len(classes))] for i in range(len(classes))]
     outs = []
     true_labels = []
     for truth_label in classes:
-        for image in os.listdir(os.path.join(directory, truth_label))[:n]:
+        images = os.listdir(os.path.join(directory, truth_label))
+        
+        for image in images[:min(n, len(images))]:
             image_path = os.path.join(directory, truth_label, image)
 
             # Initialize our inputs dictionary and process the paths into data tensors
             inputs_dict = {"image": image_path}
             inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
             answer_sets = orchestrator.infer(inputs_tensor_dict)
-            true_labels.append(truth_label)
             output = answer_sets[-1][-1]
             print(f"truth: {truth_label}, prediction: {output}, image: {image}")
-            outs.append(output)
             if output in classes:
+                true_labels.append(truth_label)
+                outs.append(output)
                 mat[classes.index(truth_label)][classes.index(output)] += 1
 
-
+    end_time = time.time()
+    print(f"Validation took: {round(end_time-start_time, 3)}s")
     print(classification_report(true_labels, outs))
 
     fig = plt.figure()
