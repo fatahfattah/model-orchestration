@@ -2,7 +2,6 @@ from models.cncmany import CNCMANY_net
 import os
 import argparse
 
-from matplotlib.pyplot import draw 
 from sklearn.metrics import classification_report
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -90,46 +89,7 @@ if __name__ == "__main__":
     social_structure.add_rule(Rule("onechemical", [LiteralCondition("positive_onechemical")]))
     social_structure.add_rule(Rule("onechemical", [LiteralCondition("negative_onechemical")]))
 
-
-
     orchestrator = Orchestrator(social_structure)
     print(repr(orchestrator))
 
-    start_time = time.time()
-
-    classes = os.listdir(directory)
-    mat = [[0 for i in range(len(classes))] for i in range(len(classes))]
-    outs = []
-    true_labels = []
-    for truth_label in classes:
-        images = os.listdir(os.path.join(directory, truth_label))
-        
-        for image in images[:min(n, len(images))]:
-            image_path = os.path.join(directory, truth_label, image)
-
-            # Initialize our inputs dictionary and process the paths into data tensors
-            inputs_dict = {"image": image_path}
-            inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
-            answer_sets = orchestrator.infer(inputs_tensor_dict)
-            output = answer_sets[-1][-1]
-            print(f"truth: {truth_label}, prediction: {output}, image: {image}")
-            if output in classes:
-                true_labels.append(truth_label)
-                outs.append(output)
-                mat[classes.index(truth_label)][classes.index(output)] += 1
-
-    end_time = time.time()
-    print(f"Validation took: {round(end_time-start_time, 3)}s")
-    print(classification_report(true_labels, outs))
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
-    ax.set_title(f"Confusion matrix of validation {classes}")
-    sns.heatmap(mat, annot=True)
-    ax.set_yticklabels([l for l in classes], 
-                        rotation = 360, 
-                        va = 'center')
-                        
-    ax.set_xticklabels(classes, rotation = -45)
-
-    plt.show()
+    orchestrator.validate(directory, n)

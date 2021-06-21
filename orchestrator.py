@@ -1,10 +1,16 @@
 import os
 from typing import List, Tuple
 
+from matplotlib.pyplot import draw 
+from sklearn.metrics import classification_report
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 from clingo.solving import Model
 from asp import ASPLoader
 from dataloader import load_input
 import clingo
+import time
 
 import logging
 logger = logging.getLogger('orchestrator')
@@ -72,42 +78,50 @@ class Orchestrator():
 
         return self.answer_sets
 
-    def validate(self, directory: str, truth_label: str, n: int) -> Tuple[int]:
+    def validate(self, directory: str, n: int, visualize = True: bool) -> Tuple[int]:
         """
         Function to validate a 
         """
-        n_correct = 0
-        n_incorrect = 0
-        for image in os.listdir(directory)[:n]:
-            image_path = os.path.join(directory, image)
-            print(image_path)
+        start_time = time.time()
+        classes = os.listdir(directory)
+        mat = [[0 for i in range(len(classes))] for i in range(len(classes))]
+        outs = []
+        true_labels = []    
+        for truth_label in classes:
+            images = os.listdir(os.path.join(directory, truth_label))
+            
+            for image in images[:min(n, len(images))]:
+                image_path = os.path.join(directory, truth_label, image)
 
-            # Initialize our inputs dictionary and process the paths into data tensors
-            inputs_dict = {"image": image_path}
-            inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
+                # Initialize our inputs dictionary and process the paths into data tensors
+                inputs_dict = {"image": image_path}
+                inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
+                answer_sets = self.infer(inputs_tensor_dict)
+                output = answer_sets[-1][-1]
+                print(f"truth: {truth_label}, prediction: {output}, image: {image}")
+                if output in classes:
+                    true_labels.append(truth_label)
+                    outs.append(output)
+                    mat[classes.index(truth_label)][classes.index(output)] += 1
 
-            answer_sets = self.infer(inputs_tensor_dict)
+        end_time = time.time()
+        print(f"Validation took: {round(end_time-start_time, 3)}s")
+        print(classification_report(true_labels, outs))
 
-            if truth_label in answer_sets[-1]:
-                n_correct += 1
-            else:
-                n_incorrect += 1
+        if visualize:
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)
+            ax.set_title(f"Confusion matrix of validation {classes}")
+            sns.heatmap(mat, annot=True)
+            ax.set_yticklabels([l for l in classes], 
+                                rotation = 360, 
+                                va = 'center')
+                                
+            ax.set_xticklabels(classes, rotation = -45)
 
-            print(answer_sets[-1])
+            plt.show()
 
-        precision = round((n_correct / n)*100, 2) if n_correct else 0.00
-        recall = round((n_correct / (n_correct+n_incorrect))*100, 2) if n_correct else 0.00
-        accuracy = round((n_correct / n)*100, 2) if n_correct else 0.00
-        f1 = round(2*((precision*recall)/(precision+recall)), 2)  if precision and recall else 0.00
-        print(f"""\nValidation finished...
-                    \tN total samples: {n}
-                    \tN correct predictions: {n_correct}
-                    \tN incorrect predictions: {n_incorrect}
-                    \tRecall: {recall}%
-                    \tAccuracy: {accuracy}%
-                    \tF1: {f1}%""")
 
-        return (precision, recall, accuracy, f1)
 
     def train():
         return ""
