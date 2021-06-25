@@ -1,8 +1,8 @@
 import torch
 import torchvision.transforms as transforms
-from agent import Agent
+from classifier import Classifier
 
-class CNC_net(Agent):
+class CNC_net(Classifier):
     """
     Chemical/non-chemical (CNC) network
     Predict whether an image contains a chemical structure or not.

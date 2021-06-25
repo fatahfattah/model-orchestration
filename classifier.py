@@ -3,9 +3,9 @@
 import torch
 import torchvision.transforms as transforms
 
-class Agent:
+class Classifier:
     """
-    Parent class of an Agent
+    Parent class of a Classifier
     """
 
     def __init__(self, classes, name, small_name, description, input_type, inference_type):
@@ -18,7 +18,7 @@ class Agent:
 
     def to_ASP(self) -> str:
         """
-        Convert agent to ASP representation.
+        Convert classifier to ASP representation.
 
         RETURNS: ASP representation
         """
@@ -26,8 +26,8 @@ class Agent:
 
     def infer(self, input, explore=False) -> str:
         """
-        Make an inference for this agent. 
+        Make an inference for this classifier. 
 
-        RETURNS: Agent inference
+        RETURNS: Classifier inference
         """
         return ""

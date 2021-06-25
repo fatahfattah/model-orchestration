@@ -1,23 +1,23 @@
-from agent import Agent
+from classifier import Classifier
 from rule import Rule
 
 class SocialStructure:
     def __init__(self) -> None:
         """
-        A social structure that consists of resources (agents) and rules.
+        A social structure that consists of resources (classifiers) and rules.
         """
-        self.agents = []
+        self.classifiers = []
         self.rules = []
 
-    def add_agent(self, agent: Agent) -> None:
+    def add_classifier(self, classifier: Classifier) -> None:
         """
-        Add a new agent to the social structure.
-        Every agent has to be an 'Agent' inherited class type.
+        Add a new classifier to the social structure.
+        Every classifier has to be an 'Classifier' inherited class type.
 
         Args:
-            agent (Agent): Agent to be added.
+            classifier (Classifier): Classifier to be added.
         """
-        self.agents.append(agent)
+        self.classifiers.append(classifier)
 
     def add_rule(self, rule: Rule) -> None:
         """
@@ -30,7 +30,7 @@ class SocialStructure:
         self.rules.append(rule)
 
     def infer(self, inputs_dict: dict, explore=False) -> dict:
-        """Run inferences on all agents for the current input:
+        """Run inferences on all classifiers for the current input:
 
         Args:
             inputs_dict (dict): e.g. {'image':[[]]}
@@ -39,18 +39,18 @@ class SocialStructure:
             {model_name:inference}: Key value pair dict with model_names as keys and their inference as value
         """
         if explore:
-            return {agent.small_name:inference for agent in self.agents for inference in agent.infer(inputs_dict[agent.input_type])}
+            return {classifier.small_name:inference for classifier in self.classifiers for inference in classifier.infer(inputs_dict[classifier.input_type])}
 
-        return {agent.small_name:agent.infer(inputs_dict[agent.input_type]) for agent in self.agents}
+        return {classifier.small_name:classifier.infer(inputs_dict[classifier.input_type]) for classifier in self.classifiers}
 
     def to_ASP(self) -> str:
         """Parse the social structure to its respective ASP representation.
 
         Returns:
-            String: ASP representation of the agents and rules.
+            String: ASP representation of the classifierss and rules.
         """
         program = ""
-        program += "\n".join([agent.to_ASP() for agent in self.agents]) # E.g. model(a,b,c)
+        program += "\n".join([classifier.to_ASP() for classifier in self.classifiers]) # E.g. model(a,b,c)
         program += "\n"
         program += "\n".join([rule.to_ASP() for rule in self.rules])
         return program

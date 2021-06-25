@@ -6,7 +6,7 @@ from itertools import groupby
 @dataclass
 class Ranking:
     target_label:str
-    ancillery_agent:str
+    ancillery_classifier:str
     ancillery_label:str
     wrong_n:int
     correct_n:int

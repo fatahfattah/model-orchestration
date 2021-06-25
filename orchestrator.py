@@ -22,13 +22,13 @@ from socialstructure import SocialStructure
 
 class Orchestrator():
     def __init__(self, social_structure: SocialStructure):
-        """Orchestrator class that 'orchestrates' a social structure of agents and rules.
+        """Orchestrator class that 'orchestrates' a social structure of classifiers and rules.
 
         Args:
-            social_structure (SocialStructure): object that represent a set of agents and rules.
+            social_structure (SocialStructure): object that represent a set of classifiers and rules.
         """
         if not social_structure:
-            logger.error(f"Error: Please make sure that you have provided a social structure of agents")
+            logger.error(f"Error: Please make sure that you have provided a social structure of classifiers")
             return
 
         self.social_structure = social_structure
@@ -38,8 +38,8 @@ class Orchestrator():
     def __repr__(self):
         return (f"""
         Orchestrator.
-        Number of agents: {len(self.social_structure.agents)}
-        Agents: {[f"{agent.small_name}: {agent.description}" for agent in self.social_structure.agents]}
+        Number of classifiers: {len(self.social_structure.classifiers)}
+        Classifiers: {[f"{classifier.small_name}: {classifier.description}" for classifier in self.social_structure.classifiers]}
         Program: {self.program}
         """)
     
@@ -78,7 +78,7 @@ class Orchestrator():
 
         return self.answer_sets
 
-    def validate(self, directory: str, n: int, visualize = True: bool) -> Tuple[int]:
+    def validate(self, directory: str, n: int, visualize: bool = True) -> Tuple[int]:
         """
         Function to validate a 
         """

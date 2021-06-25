@@ -1,9 +1,9 @@
 import torch
 import torchvision.transforms as transforms
 from torchvision.transforms.transforms import RandomAdjustSharpness
-from agent import Agent
+from classifier import Classifier
 
-class CNCMANY_net(Agent):
+class CNCMANY_net(Classifier):
     """
     Chemical/non-chemical/Many-chemical (CNC) network
     Predict whether an image contains a chemical structure or not.

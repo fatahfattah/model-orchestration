@@ -36,7 +36,7 @@ Program to (Re-)train models in a network with a meta-level filter using explici
 if __name__ == "__main__":
     input_type = 'image'
 
-    target_agent = CNCMANY_net()
+    target_classifier = CNCMANY_net()
     drawing = DRAWING_net()
     not_drawing = NOTDRAWING_net()
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     # Load dataset
     dataset = ImageFolderWithPaths(data_dir,
-                                                transform=target_agent.train_preprocessing)
+                                                transform=target_classifier.train_preprocessing)
 
     classes = dataset.classes
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     trainset = Subset(dataset, train_indices)
     testset = Subset(dataset, test_indices)
 
-    # Filter out images according to defined filters from agent relations
+    # Filter out images according to defined filters from classifier relations
     indices = np.arange(len(testset))
     
     # # We try to filter out indices that are not in our filters
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         # Retrieve the class label from the testset
         truth_label =  classes[testset[i][1]]
         input_path = testset[i][2]
-        # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
+        # If the output from the filter classifier is equal to the target filter label, then we include this indice in the trainset
         if  filters[truth_label][0].infer(load_input(input_type, input_path)) == filters[truth_label][1]:
             filtered_indices.append(i)
 

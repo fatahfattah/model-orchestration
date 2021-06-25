@@ -2,7 +2,7 @@ models/cnc.pth
 models/hl.pth
 *.pth
 *.icloud
-
+*.p
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

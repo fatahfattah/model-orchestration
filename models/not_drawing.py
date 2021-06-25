@@ -1,9 +1,9 @@
 import torch
 import torchvision.transforms as transforms
 from torchvision.transforms.transforms import RandomAdjustSharpness
-from agent import Agent
+from classifier import Classifier
 
-class NOTDRAWING_net(Agent):
+class NOTDRAWING_net(Classifier):
     """
     (Negative) Not drawing/ not not drawing network
     Predict whether an image has not depicted a drawing.

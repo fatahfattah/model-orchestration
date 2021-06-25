@@ -1,9 +1,9 @@
 import torch
 import torchvision.transforms as transforms
 from torchvision.transforms.transforms import RandomAdjustSharpness
-from agent import Agent
+from classifier import Classifier
 
-class CNCMANY_DRAWFILTER_POSITIVE_net(Agent):
+class CNCMANY_DRAWFILTER_POSITIVE_net(Classifier):
     """
     Chemical/non-chemical/many-chemical network specialized with drawingfilter (CNC)(positive) network
     Predict whether an image contains a chemical structure or not.

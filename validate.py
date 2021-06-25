@@ -50,11 +50,11 @@ if __name__ == "__main__":
     drawing = DRAWING_net()
     not_drawing = NOTDRAWING_net()
 
-    social_structure.add_agent(cncmany)
-    social_structure.add_agent(cncmany_drawfilter_positive)
-    social_structure.add_agent(cncmany_drawfilter_negative)
-    social_structure.add_agent(drawing)
-    social_structure.add_agent(not_drawing)
+    social_structure.add_classifier(cncmany)
+    social_structure.add_classifier(cncmany_drawfilter_positive)
+    social_structure.add_classifier(cncmany_drawfilter_negative)
+    social_structure.add_classifier(drawing)
+    social_structure.add_classifier(not_drawing)
 
     # Add our filtering rules
     social_structure.add_rule(Rule("filter_many", [PositiveCondition(drawing, "drawing")]))

@@ -21,50 +21,50 @@ class LiteralCondition(Condition):
         return f"{self.literal}"
 
 class PositiveCondition(Condition):
-    def __init__(self, agent, outcome) -> None:
-        """A positive condition with for an agent output 'model(a)'
+    def __init__(self, classifier, outcome) -> None:
+        """A positive condition with for an classifier output 'model(a)'
 
         Args:
-            agent (String): modelname
+            classifier (String): modelname
             outcome (String): output label
         """
         super().__init__()
-        self.agent = agent
+        self.classifier = classifier
         self.outcome = outcome
     
     def to_ASP(self):
-        return f"{self.agent.small_name}({self.outcome})"
+        return f"{self.classifier.small_name}({self.outcome})"
 
 class NegativeCondition(Condition):
-    def __init__(self, agent, outcome) -> None:
-        """A negative condition with for an agent output e.g. ' not model(a)'
+    def __init__(self, classifier, outcome) -> None:
+        """A negative condition with for an classifier output e.g. ' not model(a)'
 
         Args:
-            agent (String): modelname
+            classifier (String): modelname
             outcome (String): output label
         """
         super().__init__()
-        self.agent = agent
+        self.classifier = classifier
         self.outcome = outcome
     
     def to_ASP(self):
-        return f"not {self.agent.small_name}({self.outcome})"
+        return f"not {self.classifier.small_name}({self.outcome})"
 
 class ComparisonCondition(Condition):
-    def __init__(self, agent, outcome, operator, value) -> None:
-        """A comparison condition on an agent's inference e.g. 'model(a) > 1'
+    def __init__(self, classifier, outcome, operator, value) -> None:
+        """A comparison condition on an classifier's inference e.g. 'model(a) > 1'
 
         Args:
-            agent (String): modelname
+            classifier (String): modelname
             outcome (String): output label
             operater (String): operator such as >, <, >=, <=, ==
             value (String): comparison value
         """
         super().__init__()
-        self.agent = agent
+        self.classifier = classifier
         self.outcome = outcome
         self.operator = operator
         self.value = value
 
     def to_ASP(self):
-        return f"{self.agent.small_name}({self.outcome}) {self.operator} {self.value}"
+        return f"{self.classifier.small_name}({self.outcome}) {self.operator} {self.value}"

@@ -8,9 +8,9 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from dataloader import load_input
 
-from agent import Agent
+from classifier import Classifier
 
-class PC_net(Agent):
+class PC_net(Classifier):
     """
     Pixel clustering classifier
     Predict the number of pixel clusters that an image contains

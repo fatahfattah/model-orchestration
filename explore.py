@@ -56,7 +56,7 @@ if __name__ == "__main__":
                     #  "pc": PC_net()
                      }
 
-    target_agent = CNCMANY_net()
+    target_classifier = CNCMANY_net()
 
     truth_labels = os.listdir(root_dir)
     inferences = {}
@@ -71,15 +71,15 @@ if __name__ == "__main__":
             inputs_dict = {"image": image_path}
             inputs_tensor_dict = {name: load_input(name, path) for name, path in inputs_dict.items()}
 
-            # If the target agent makes a wrong prediction, we will register the ancillery outputs
-            target_agent_inference = target_agent.infer(inputs_tensor_dict[target_agent.input_type])
-            for name, agent in model_mapping.items():
-                # Register inferences for current ancillery agent
+            # If the target classifier makes a wrong prediction, we will register the ancillery outputs
+            target_classifier_inference = target_classifier.infer(inputs_tensor_dict[target_classifier.input_type])
+            for name, classifier in model_mapping.items():
+                # Register inferences for current ancillery classifier
                 inferences.setdefault(name, {})
-                agent_inferences = agent.infer(inputs_tensor_dict[agent.input_type])
+                classifier_inferences = classifier.infer(inputs_tensor_dict[classifier.input_type])
                 # Register each inference for this true label
-                for inf in agent_inferences if isinstance(agent_inferences, list) else [agent_inferences]:
-                    if target_agent_inference != truth_label:
+                for inf in classifier_inferences if isinstance(classifier_inferences, list) else [classifier_inferences]:
+                    if target_classifier_inference != truth_label:
                         inferences[name].setdefault(f"(wrong) {truth_label}", []).append(inf)
                     else:
                         inferences[name].setdefault(f"(correct) {truth_label}", []).append(inf)
@@ -88,19 +88,19 @@ if __name__ == "__main__":
     fig_index = 1
     filters = {}
     rankings = []
-    for name, agent in model_mapping.items():
+    for name, classifier in model_mapping.items():
         if not name in inferences:
             continue
 
-        agent_inferences = inferences[name]
-        classes = agent.classes
-        y_headers = list(agent_inferences.keys())
+        classifier_inferences = inferences[name]
+        classes = classifier.classes
+        y_headers = list(classifier_inferences.keys())
         mat = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
         matrelative = [[0 for i in range(len(classes))] for i in range(len(y_headers))]
 
         # Register the amount of hits for each true_label (correct/wrong) combination with ancillery output
         for i, label in enumerate(y_headers):
-            for pred in agent_inferences[label]:
+            for pred in classifier_inferences[label]:
                 mat[i][classes.index(pred)] += 1
 
         matsums = [sum(row) for row in mat]
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                 rankings.append(Ranking(t, name, c, wrong_n, correct_n, wrong_ratio, correct_ratio, wrong_ratio-correct_ratio))
 
         ax = fig.add_subplot(len(model_mapping.keys()), 1, fig_index)
-        ax.set_title(agent.name)
+        ax.set_title(classifier.name)
         sns.heatmap(matrelative, annot=True)
         ax.set_yticklabels([l for l in y_headers], 
                             rotation = 360, 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         
         ax = fig.add_subplot(len(truth_labels), 1, fig_index)
         ax.set_title(f"Rankings for: {t}")
-        y_headers = [f"{r.ancillery_agent}({r.ancillery_label})" for r in grouped_rankings]
+        y_headers = [f"{r.ancillery_classifier}({r.ancillery_label})" for r in grouped_rankings]
         rankings_mat = [r.to_mat() for r in grouped_rankings]
         sns.heatmap(rankings_mat, annot=True)
         ax.set_yticklabels([l for l in y_headers], rotation=360, va='center')

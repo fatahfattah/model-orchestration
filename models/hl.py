@@ -1,9 +1,9 @@
 import torch
 import torchvision.transforms as transforms
 
-from agent import Agent
+from classifier import Classifier
 
-class HL_net(Agent):
+class HL_net(Classifier):
     """
     Higher level (HL) network
     Classifies an image into nine classes that describe an image on a high level.

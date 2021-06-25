@@ -42,10 +42,10 @@ if __name__ == "__main__":
     hl = HL_net()
     pc = PC_net()
 
-    social_structure.add_agent(cnc)
-    social_structure.add_agent(cncmany)
-    social_structure.add_agent(hl)
-    social_structure.add_agent(pc)
+    social_structure.add_classifier(cnc)
+    social_structure.add_classifier(cncmany)
+    social_structure.add_classifier(hl)
+    social_structure.add_classifier(pc)
 
     # social_structure.add_rule(Rule("onechemicalstructure", [PositiveCondition(cncmany, "onechemical")]))
     # social_structure.add_rule(Rule("manychemicalstructure", [PositiveCondition(cncmany, "manychemical")]))

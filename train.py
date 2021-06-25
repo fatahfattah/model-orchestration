@@ -123,7 +123,7 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
 if __name__ == "__main__":
     input_type = 'image'
 
-    target_agent = CNCMANY_net()
+    target_classifier = CNCMANY_net()
     drawing = DRAWING_net()
     not_drawing = NOTDRAWING_net()
 
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 		'nonchemical': [not_drawing, 'not_drawing']
     }
 
-    # Filter out images according to defined filters from agent relations
+    # Filter out images according to defined filters from classifier relations
     indices = np.arange(len(trainset))
 
     # We try to filter out indices that are not in our filters
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         # Retrieve the class label from the trainset
         truth_label =  classes[trainset[i][1]]
 
-        # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
+        # If the output from the filter classifier is equal to the target filter label, then we include this indice in the trainset
         if  filters[truth_label][0].infer(load_input(input_type, trainset[i][2])) == filters[truth_label][1]:
             filtered_indices.append(i)
         else:
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     negative_trainset = Subset(trainset, negative_filtered_indices)
     positive_trainset = Subset(trainset, filtered_indices)
 
-    # Filter out images according to defined filters from agent relations
+    # Filter out images according to defined filters from classifier relations
     indices = np.arange(len(testset))
     
     # # We try to filter out indices that are not in our filters
@@ -191,7 +191,7 @@ if __name__ == "__main__":
         # Retrieve the class label from the testset
         truth_label =  classes[testset[i][1]]
         input_path = testset[i][2]
-        # If the output from the filter agent is equal to the target filter label, then we include this indice in the trainset
+        # If the output from the filter classifier is equal to the target filter label, then we include this indice in the trainset
         if  filters[truth_label][0].infer(load_input(input_type, input_path)) == filters[truth_label][1]:
             filtered_indices.append(i)
             copy(input_path, os.path.join(dest_dir, truth_label))
@@ -214,8 +214,8 @@ if __name__ == "__main__":
                                                          ,positive_testset
                                                          ,model_save_path
                                                          ,model_identifier
-                                                         ,target_agent.train_preprocessing
-                                                         ,target_agent.preprocessing) 
+                                                         ,target_classifier.train_preprocessing
+                                                         ,target_classifier.preprocessing) 
     plt.figure()
     plt.plot(training_losses)
 
@@ -232,8 +232,8 @@ if __name__ == "__main__":
                                                         , negative_testset
                                                         , model_save_path
                                                         , f"negative_{model_identifier}"
-                                                        ,target_agent.train_preprocessing
-                                                        ,target_agent.preprocessing)
+                                                        ,target_classifier.train_preprocessing
+                                                        ,target_classifier.preprocessing)
     plt.figure()
     plt.plot(training_losses)
 

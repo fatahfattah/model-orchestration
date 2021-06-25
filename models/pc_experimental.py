@@ -2,9 +2,9 @@ import sys
 sys.path.append('..')
 import numpy as np
 
-from agent import Agent
+from classifier import Classifier
 
-class PC_net(Agent):
+class PC_net(Classifier):
     """
     Pixel clustering classifier
     Predict the number of pixel clusters that an image contains
