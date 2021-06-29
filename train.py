@@ -43,8 +43,8 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
     """
 
     #Instantiate torch data loaders
-    train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True, transform=train_transforms)
-    test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False, transform=test_transforms)
+    train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
+    test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False)
 
     # Choose cuda if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -72,6 +72,7 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
         running_loss = 0.0
         for i, data in enumerate(train_data_loader, 0):
             inputs, labels = data[0].to(device), data[1].to(device)
+            inputs = train_transforms(inputs)
             # Zero the parameter gradients
             optimizer.zero_grad()
             
@@ -95,6 +96,7 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
         with torch.no_grad():
             for data in test_data_loader:
                 images, labels = data[0].to(device), data[1].to(device)
+                images = test_transforms(images)
                 true_labels.extend(labels)
                 outputs = model(images)
                 _, predicted = torch.max(outputs, 1)
@@ -112,11 +114,10 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
         true_labels = [int(x) for x in true_labels]
         outs = [int(x) for x in outs]
         print(classification_report(true_labels, outs))
-
     
     # # Save trained model to storage
     PATH = f'{path}/{modelname}.pth'
-    torch.save(model.state_dict(), PATH)
+    # torch.save(model.state_dict(), PATH)
 
     return (training_losses, validation_losses)
 
@@ -136,7 +137,11 @@ if __name__ == "__main__":
     with_filter = True
 
     # Load dataset
-    dataset = ImageFolderWithPaths(data_dir)
+    dataset = ImageFolderWithPaths(data_dir, transform=transforms.Compose([
+                                                 transforms.ToTensor(),
+                                                 transforms.Resize(image_size)
+                                                 ]))
+
 
     classes = dataset.classes
 
@@ -174,8 +179,8 @@ if __name__ == "__main__":
         else:
             negative_filtered_indices.append(i)
 
-    pickle.dump(filtered_indices, open('filtered_indices_postive.p', 'wb'))
-    pickle.dump(negative_filtered_indices, open('filtered_indices_negative.p', 'wb'))
+    # pickle.dump(filtered_indices, open('filtered_indices_postive.p', 'wb'))
+    # pickle.dump(negative_filtered_indices, open('filtered_indices_negative.p', 'wb'))
     # filtered_indices = pickle.load(open('filtered_indices.p', 'rb'))
 
     negative_trainset = Subset(trainset, negative_filtered_indices)
@@ -200,8 +205,8 @@ if __name__ == "__main__":
             copy(input_path, os.path.join(f"{dest_dir}_negative", truth_label))
 
 
-    pickle.dump(filtered_indices, open('filtered_indices_test_postive.p', 'wb'))
-    pickle.dump(negative_filtered_indices, open('filtered_indices_test_negative.p', 'wb'))
+    # pickle.dump(filtered_indices, open('filtered_indices_test_postive.p', 'wb'))
+    # pickle.dump(negative_filtered_indices, open('filtered_indices_test_negative.p', 'wb'))
 
     negative_testset = Subset(testset, negative_filtered_indices)
     positive_testset = Subset(testset, filtered_indices)
@@ -219,26 +224,26 @@ if __name__ == "__main__":
     plt.figure()
     plt.plot(training_losses)
 
-    plt.figure()
-    for name, loss in validation_losses.items():
-        plt.plot(loss)
+    # plt.figure()
+    # for name, loss in validation_losses.items():
+    #     plt.plot(loss)
 
 
-    print(f"Number of training datapoints after filter: {len(negative_trainset)}")
-    print(Counter([classes[dataset.targets[i]] for i in negative_filtered_indices]))
+    # print(f"Number of training datapoints after filter: {len(negative_trainset)}")
+    # print(Counter([classes[dataset.targets[i]] for i in negative_filtered_indices]))
 
-    # We train the negative version of the specialized classifier
-    training_losses, validation_losses = specialized_train(negative_trainset
-                                                        , negative_testset
-                                                        , model_save_path
-                                                        , f"negative_{model_identifier}"
-                                                        ,target_classifier.train_preprocessing
-                                                        ,target_classifier.preprocessing)
-    plt.figure()
-    plt.plot(training_losses)
+    # # We train the negative version of the specialized classifier
+    # training_losses, validation_losses = specialized_train(negative_trainset
+    #                                                     , negative_testset
+    #                                                     , model_save_path
+    #                                                     , f"negative_{model_identifier}"
+    #                                                     ,target_classifier.train_preprocessing
+    #                                                     ,target_classifier.preprocessing)
+    # plt.figure()
+    # plt.plot(training_losses)
 
-    plt.figure()
-    for name, loss in validation_losses.items():
-        plt.plot(loss)
+    # plt.figure()
+    # for name, loss in validation_losses.items():
+    #     plt.plot(loss)
 
     plt.show()

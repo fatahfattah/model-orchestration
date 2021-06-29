@@ -28,13 +28,9 @@ class CNCMANY_net(Classifier):
         self.input_size = (299,299)
         self.base_model = 'inception_v3'
         self.preprocessing = transforms.Compose([
-                                                 transforms.ToTensor(),
-                                                 transforms.Resize(self.input_size),
                                                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                                                  ])
         self.train_preprocessing = transforms.Compose([
-                                                transforms.ToTensor(),
-                                                transforms.Resize(self.input_size),
                                                 transforms.RandomHorizontalFlip(),
                                                 transforms.RandomVerticalFlip(),
                                                 transforms.RandomAdjustSharpness(0),

@@ -15,6 +15,7 @@ from condition import *
 
 from models.cncmany_drawfilter_positive import CNCMANY_DRAWFILTER_POSITIVE_net
 from models.cncmany_drawfilter_negative import CNCMANY_DRAWFILTER_NEGATIVE_net
+from models.cncmany_aggregated import CNCMANY_AGGREGATED_net
 from models.drawing import DRAWING_net
 from models.not_drawing import NOTDRAWING_net
 import time
@@ -45,49 +46,22 @@ if __name__ == "__main__":
 
     social_structure = SocialStructure()
     cncmany = CNCMANY_net()
+    cncmany_aggregated = CNCMANY_AGGREGATED_net()
     cncmany_drawfilter_positive = CNCMANY_DRAWFILTER_POSITIVE_net()
     cncmany_drawfilter_negative = CNCMANY_DRAWFILTER_NEGATIVE_net()
     drawing = DRAWING_net()
     not_drawing = NOTDRAWING_net()
 
     social_structure.add_classifier(cncmany)
+    social_structure.add_classifier(cncmany_aggregated)
     social_structure.add_classifier(cncmany_drawfilter_positive)
     social_structure.add_classifier(cncmany_drawfilter_negative)
     social_structure.add_classifier(drawing)
     social_structure.add_classifier(not_drawing)
 
-    # Add our filtering rules
-    social_structure.add_rule(Rule("filter_many", [PositiveCondition(drawing, "drawing")]))
-    social_structure.add_rule(Rule("filter_none", [PositiveCondition(not_drawing, "not_not_drawing")]))
-    social_structure.add_rule(Rule("filter_one", [PositiveCondition(not_drawing, "not_drawing")]))
-
-    social_structure.add_rule(Rule("positive_manychemical", [PositiveCondition(cncmany_drawfilter_positive, "manychemical"), LiteralCondition("filter_many")]))
-    social_structure.add_rule(Rule("positive_nonchemical", [PositiveCondition(cncmany_drawfilter_positive, "nonchemical"), LiteralCondition("filter_none")]))
-    social_structure.add_rule(Rule("positive_onechemical", [PositiveCondition(cncmany_drawfilter_positive, "onechemical"), LiteralCondition("filter_one")]))
-
-    social_structure.add_rule(Rule("negative_manychemical", [PositiveCondition(cncmany_drawfilter_negative, "manychemical")
-                                                            , LiteralCondition("not positive_manychemical")
-                                                            , LiteralCondition("not positive_nonchemical")
-                                                            , LiteralCondition("not positive_onechemical")]))
-
-    social_structure.add_rule(Rule("negative_nonchemical", [PositiveCondition(cncmany_drawfilter_negative, "nonchemical")
-                                                            , LiteralCondition("not positive_manychemical")
-                                                            , LiteralCondition("not positive_nonchemical")
-                                                            , LiteralCondition("not positive_onechemical")]))
-
-    social_structure.add_rule(Rule("negative_onechemical", [PositiveCondition(cncmany_drawfilter_negative, "onechemical")
-                                                            , LiteralCondition("not positive_manychemical")
-                                                            , LiteralCondition("not positive_nonchemical")
-                                                            , LiteralCondition("not positive_onechemical")]))
-
-    social_structure.add_rule(Rule("manychemical", [LiteralCondition("positive_manychemical")]))
-    social_structure.add_rule(Rule("manychemical", [LiteralCondition("negative_manychemical")]))
-
-    social_structure.add_rule(Rule("nonchemical", [LiteralCondition("positive_nonchemical")]))
-    social_structure.add_rule(Rule("nonchemical", [LiteralCondition("negative_nonchemical")]))
-
-    social_structure.add_rule(Rule("onechemical", [LiteralCondition("positive_onechemical")]))
-    social_structure.add_rule(Rule("onechemical", [LiteralCondition("negative_onechemical")]))
+    social_structure.add_rule(Rule("onechemical", [PositiveCondition(cncmany_aggregated, "onechemical")]))
+    social_structure.add_rule(Rule("manychemical", [PositiveCondition(cncmany_aggregated, "manychemical")]))
+    social_structure.add_rule(Rule("nonchemical", [PositiveCondition(cncmany_aggregated, "nonchemical")]))
 
     orchestrator = Orchestrator(social_structure)
     print(repr(orchestrator))
