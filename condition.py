@@ -49,22 +49,3 @@ class NegativeCondition(Condition):
     
     def to_ASP(self):
         return f"not {self.classifier.small_name}({self.outcome})"
-
-class ComparisonCondition(Condition):
-    def __init__(self, classifier, outcome, operator, value) -> None:
-        """A comparison condition on an classifier's inference e.g. 'model(a) > 1'
-
-        Args:
-            classifier (String): modelname
-            outcome (String): output label
-            operater (String): operator such as >, <, >=, <=, ==
-            value (String): comparison value
-        """
-        super().__init__()
-        self.classifier = classifier
-        self.outcome = outcome
-        self.operator = operator
-        self.value = value
-
-    def to_ASP(self):
-        return f"{self.classifier.small_name}({self.outcome}) {self.operator} {self.value}"
