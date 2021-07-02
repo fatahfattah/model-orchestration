@@ -7,18 +7,18 @@ class Condition:
     def to_ASP():
         return ""
 
-class LiteralCondition(Condition):
-    def __init__(self, literal) -> None:
-        """Literal condition of form 'a.'.
+class ConstantCondition(Condition):
+    def __init__(self, constant) -> None:
+        """Constant condition of form 'a.'.
 
         Args:
-            literal (String): E.g. 'a'
+            constant (String): E.g. 'a'
         """
         super().__init__()
-        self.literal = literal
+        self.constant = constant
 
     def to_ASP(self):
-        return f"{self.literal}"
+        return f"{self.constant}"
 
 class PositiveCondition(Condition):
     def __init__(self, classifier, outcome) -> None:
