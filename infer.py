@@ -50,9 +50,9 @@ if __name__ == "__main__":
     # social_structure.add_classifier(hl)
     # social_structure.add_classifier(pc)
 
-    social_structure.add_rule(Rule("onechemicalstructure", [PositiveCondition(cncmany_aggregated, "onechemical")]))
-    social_structure.add_rule(Rule("manychemicalstructure", [PositiveCondition(cncmany_aggregated, "manychemical")]))
-    social_structure.add_rule(Rule("nonchemicalimage", [PositiveCondition(cncmany_aggregated, "nonchemical")]))
+    social_structure.add_rule(Rule("onechemicalstructure", [FunctionCondition(cncmany_aggregated, "onechemical")]))
+    social_structure.add_rule(Rule("manychemicalstructure", [FunctionCondition(cncmany_aggregated, "manychemical")]))
+    social_structure.add_rule(Rule("nonchemicalimage", [FunctionCondition(cncmany_aggregated, "nonchemical")]))
 
     # Initialize our inputs dictionary and process the paths into data tensors
     inputs_dict = {"image": image_filename}

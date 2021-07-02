@@ -20,9 +20,9 @@ class ConstantCondition(Condition):
     def to_ASP(self):
         return f"{self.constant}"
 
-class PositiveCondition(Condition):
+class FunctionCondition(Condition):
     def __init__(self, classifier, outcome) -> None:
-        """A positive condition with for an classifier output 'model(a)'
+        """A function condition for an classifier output 'model(a)'
 
         Args:
             classifier (String): modelname
@@ -35,9 +35,9 @@ class PositiveCondition(Condition):
     def to_ASP(self):
         return f"{self.classifier.small_name}({self.outcome})"
 
-class NegativeCondition(Condition):
+class NegativeFunctionCondition(Condition):
     def __init__(self, classifier, outcome) -> None:
-        """A negative condition with for an classifier output e.g. ' not model(a)'
+        """A negative function condition for an classifier output e.g. ' not model(a)'
 
         Args:
             classifier (String): modelname

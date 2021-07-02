@@ -1,6 +1,6 @@
 
 class Rule:
-    def __init__(self, outheadput, body) -> None:
+    def __init__(self, head, body) -> None:
         self.head = head
         self.body = body
     

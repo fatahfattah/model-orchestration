@@ -59,9 +59,9 @@ if __name__ == "__main__":
     social_structure.add_classifier(drawing)
     social_structure.add_classifier(not_drawing)
 
-    social_structure.add_rule(Rule("onechemical", [PositiveCondition(cncmany_aggregated, "onechemical")]))
-    social_structure.add_rule(Rule("manychemical", [PositiveCondition(cncmany_aggregated, "manychemical")]))
-    social_structure.add_rule(Rule("nonchemical", [PositiveCondition(cncmany_aggregated, "nonchemical")]))
+    social_structure.add_rule(Rule("onechemical", [FunctionCondition(cncmany_aggregated, "onechemical")]))
+    social_structure.add_rule(Rule("manychemical", [FunctionCondition(cncmany_aggregated, "manychemical")]))
+    social_structure.add_rule(Rule("nonchemical", [FunctionCondition(cncmany_aggregated, "nonchemical")]))
 
     orchestrator = Orchestrator(social_structure)
     print(repr(orchestrator))
