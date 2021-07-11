@@ -4,7 +4,7 @@ import numpy as np
 
 from classifier import Classifier
 
-class PC_net(Classifier):
+class PC_NN(Classifier):
     """
     Pixel clustering classifier
     Predict the number of pixel clusters that an image contains

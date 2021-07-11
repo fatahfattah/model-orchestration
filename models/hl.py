@@ -3,7 +3,7 @@ import torchvision.transforms as transforms
 
 from classifier import Classifier
 
-class HL_net(Classifier):
+class HL_NN(Classifier):
     """
     Higher level (HL) network
     Classifies an image into nine classes that describe an image on a high level.

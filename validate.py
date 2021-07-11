@@ -13,11 +13,11 @@ from socialstructure import SocialStructure
 from rule import Rule
 from condition import *
 
-from models.cncmany_drawfilter_positive import CNCMANY_DRAWFILTER_POSITIVE_net
-from models.cncmany_drawfilter_negative import CNCMANY_DRAWFILTER_NEGATIVE_net
-from models.cncmany_aggregated import CNCMANY_AGGREGATED_net
-from models.drawing import DRAWING_net
-from models.not_drawing import NOTDRAWING_net
+from models.cncmany_drawfilter_positive import CNCMANY_DRAWFILTER_POSITIVE_NN
+from models.cncmany_drawfilter_negative import CNCMANY_DRAWFILTER_NEGATIVE_NN
+from models.cncmany_aggregated import CNCMANY_AGGREGATED_NN
+from models.drawing import DRAWING_NN
+from models.not_drawing import NOTDRAWING_NN
 import time
 
 

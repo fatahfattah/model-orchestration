@@ -8,12 +8,12 @@ from socialstructure import SocialStructure
 from rule import Rule
 from condition import *
 
-from models.drawing import DRAWING_net
-from models.not_drawing import NOTDRAWING_net
-from models.cncmany_drawfilter_positive import CNCMANY_DRAWFILTER_POSITIVE_net
-from models.cncmany_drawfilter_negative import CNCMANY_DRAWFILTER_NEGATIVE_net
+from models.drawing import DRAWING_NN
+from models.not_drawing import NOTDRAWING_NN
+from models.cncmany_drawfilter_positive import CNCMANY_DRAWFILTER_POSITIVE_NN
+from models.cncmany_drawfilter_negative import CNCMANY_DRAWFILTER_NEGATIVE_NN
 
-class CNCMANY_AGGREGATED_net(Classifier):
+class CNCMANY_AGGREGATED_NN(Classifier):
     """
     Aggregated Chemical/non-chemical/Many-chemical (CNC) network
     Predict whether an image contains a chemical structure or not.
@@ -28,10 +28,10 @@ class CNCMANY_AGGREGATED_net(Classifier):
                         "classification")
 
         social_structure = SocialStructure()
-        positive_classifier = CNCMANY_DRAWFILTER_POSITIVE_net()
-        negative_classifier = CNCMANY_DRAWFILTER_NEGATIVE_net()
-        drawing = DRAWING_net()
-        not_drawing = NOTDRAWING_net()
+        positive_classifier = CNCMANY_DRAWFILTER_POSITIVE_NN()
+        negative_classifier = CNCMANY_DRAWFILTER_NEGATIVE_NN()
+        drawing = DRAWING_NN()
+        not_drawing = NOTDRAWING_NN()
 
         social_structure.add_classifier(positive_classifier)
         social_structure.add_classifier(negative_classifier)
