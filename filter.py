@@ -1,5 +1,5 @@
-from models.not_drawing import NOTDRAWING_net
-from models.drawing import DRAWING_net
+from models.not_drawing import NOTDRAWING_NN
+from models.drawing import DRAWING_NN
 from tqdm import tqdm
 import numpy as np
 
@@ -21,10 +21,10 @@ from shutil import copy
 import os
 
 from dataloader import load_input, ImageFolderWithPaths
-from models.cncmany import CNCMANY_net
-from models.hl import HL_net
-from models.drawing import DRAWING_net
-from models.not_drawing import NOTDRAWING_net
+from models.cncmany import CNCMANY_NN
+from models.hl import HL_NN
+from models.drawing import DRAWING_NN
+from models.not_drawing import NOTDRAWING_NN
 
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -36,9 +36,9 @@ Program to (Re-)train models in a network with a meta-level filter using explici
 if __name__ == "__main__":
     input_type = 'image'
 
-    target_classifier = CNCMANY_net()
-    drawing = DRAWING_net()
-    not_drawing = NOTDRAWING_net()
+    target_classifier = CNCMANY_NN()
+    drawing = DRAWING_NN()
+    not_drawing = NOTDRAWING_NN()
 
     filters = {
                 'manychemical': [not_drawing, 'not_not_drawing'],

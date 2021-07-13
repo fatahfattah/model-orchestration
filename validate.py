@@ -1,4 +1,4 @@
-from models.cncmany import CNCMANY_net
+from models.cncmany import CNCMANY_NN
 import os
 import argparse
 
@@ -45,12 +45,12 @@ if __name__ == "__main__":
     print(f"We will start validation...\n\tDirectory: {directory}")
 
     social_structure = SocialStructure()
-    cncmany = CNCMANY_net()
-    cncmany_aggregated = CNCMANY_AGGREGATED_net()
-    cncmany_drawfilter_positive = CNCMANY_DRAWFILTER_POSITIVE_net()
-    cncmany_drawfilter_negative = CNCMANY_DRAWFILTER_NEGATIVE_net()
-    drawing = DRAWING_net()
-    not_drawing = NOTDRAWING_net()
+    cncmany = CNCMANY_NN()
+    cncmany_aggregated = CNCMANY_AGGREGATED_NN()
+    cncmany_drawfilter_positive = CNCMANY_DRAWFILTER_POSITIVE_NN()
+    cncmany_drawfilter_negative = CNCMANY_DRAWFILTER_NEGATIVE_NN()
+    drawing = DRAWING_NN()
+    not_drawing = NOTDRAWING_NN()
 
     social_structure.add_classifier(cncmany)
     social_structure.add_classifier(cncmany_aggregated)

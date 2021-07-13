@@ -1,7 +1,7 @@
 
 from torchvision import transforms
-from models.not_drawing import NOTDRAWING_net
-from models.drawing import DRAWING_net
+from models.not_drawing import NOTDRAWING_NN
+from models.drawing import DRAWING_NN
 from tqdm import tqdm
 import numpy as np
 
@@ -24,10 +24,10 @@ from torch.utils.data import DataLoader, Subset
 
 
 from dataloader import load_input, ImageFolderWithPaths
-from models.cncmany import CNCMANY_net
-from models.hl import HL_net
-from models.drawing import DRAWING_net
-from models.not_drawing import NOTDRAWING_net
+from models.cncmany import CNCMANY_NN
+from models.hl import HL_NN
+from models.drawing import DRAWING_NN
+from models.not_drawing import NOTDRAWING_NN
 
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -124,9 +124,9 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
 if __name__ == "__main__":
     input_type = 'image'
 
-    target_classifier = CNCMANY_net()
-    drawing = DRAWING_net()
-    not_drawing = NOTDRAWING_net()
+    target_classifier = CNCMANY_NN()
+    drawing = DRAWING_NN()
+    not_drawing = NOTDRAWING_NN()
 
     image_size = (299, 299)
     batch_size = 8

@@ -10,11 +10,11 @@ from condition import *
 from rule import *
 
 from orchestrator import Orchestrator
-from models.cnc import CNC_net
-from models.cncmany_aggregated import CNCMANY_AGGREGATED_net
-from models.cncmany import CNCMANY_net
-from models.hl import HL_net
-from models.pc_experimental import PC_net
+from models.cnc import CNC_NN
+from models.cncmany_aggregated import CNCMANY_AGGREGATED_NN
+from models.cncmany import CNCMANY_NN
+from models.hl import HL_NN
+from models.pc_experimental import PC_NN
 
 
 """
@@ -38,11 +38,11 @@ if __name__ == "__main__":
     
     social_structure = SocialStructure()
     
-    # cnc = CNC_net()
-    cncmany_aggregated = CNCMANY_AGGREGATED_net()
-    # cncmany = CNCMANY_net()
-    # hl = HL_net()
-    # pc = PC_net()
+    # cnc = CNC_NN()
+    cncmany_aggregated = CNCMANY_AGGREGATED_NN()
+    # cncmany = CNCMANY_NN()
+    # hl = HL_NN()
+    # pc = PC_NN()
 
     # social_structure.add_classifier(cnc)
     social_structure.add_classifier(cncmany_aggregated)
