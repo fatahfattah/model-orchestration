@@ -52,12 +52,12 @@ if __name__ == "__main__":
     drawing = DRAWING_NN()
     not_drawing = NOTDRAWING_NN()
 
-    social_structure.add_classifier(cncmany)
+    # social_structure.add_classifier(cncmany)
     social_structure.add_classifier(cncmany_aggregated)
-    social_structure.add_classifier(cncmany_drawfilter_positive)
-    social_structure.add_classifier(cncmany_drawfilter_negative)
-    social_structure.add_classifier(drawing)
-    social_structure.add_classifier(not_drawing)
+    # social_structure.add_classifier(cncmany_drawfilter_positive)
+    # social_structure.add_classifier(cncmany_drawfilter_negative)
+    # social_structure.add_classifier(drawing)
+    # social_structure.add_classifier(not_drawing)
 
     social_structure.add_rule(Rule("onechemical", [FunctionCondition(cncmany_aggregated, "onechemical")]))
     social_structure.add_rule(Rule("manychemical", [FunctionCondition(cncmany_aggregated, "manychemical")]))

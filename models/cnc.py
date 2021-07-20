@@ -22,15 +22,18 @@ class CNC_NN(Classifier):
         self.model.eval()
         self.input_size = (299,299)
         self.base_model = 'inception_v3'
-        self.preprocessing = transforms.Compose([
+        self.inference_preprocessing = transforms.Compose([
                                                  transforms.ToTensor(),
                                                  transforms.Resize(self.input_size),
                                                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                                                  ])
+        self.preprocessing = transforms.Compose([
+                                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                                 ])
         self.train_preprocessing = transforms.Compose([
-                                                transforms.ToTensor(),
-                                                transforms.Resize(self.input_size),
                                                 transforms.RandomHorizontalFlip(),
+                                                transforms.RandomVerticalFlip(),
+                                                transforms.RandomAdjustSharpness(0),
                                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                                                 ])
 
@@ -44,13 +47,12 @@ class CNC_NN(Classifier):
         prediction = ""
 
         image = image.convert('RGB')
-        image = self.preprocessing(image)
+        image = self.inference_preprocessing(image)
         with torch.no_grad():
             outputs = self.model(image[None, ...])
             aux, predicted = torch.max(outputs, 1)
             confidence = round(aux[0].item(), 2)
             prediction = self.classes[predicted[0]]
-
 
         print(f"{self.small_name}: {prediction}@{confidence}")
         return prediction

@@ -1,4 +1,3 @@
-
 from torchvision import transforms
 from models.not_drawing import NOTDRAWING_NN
 from models.drawing import DRAWING_NN
@@ -43,8 +42,8 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
     """
 
     #Instantiate torch data loaders
-    train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-    test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False)
+    train_data_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True, drop_last=True)
+    test_data_loader = DataLoader(testset, batch_size=batch_size, shuffle=False, drop_last=True)
 
     # Choose cuda if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -76,7 +75,7 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
             # Zero the parameter gradients
             optimizer.zero_grad()
             
-            outputs, aux = model(inputs)
+            outputs, _ = model(inputs)
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -107,17 +106,20 @@ def specialized_train(trainset, testset, path, modelname, train_transforms, test
                     class_total[label] += 1
 
         for i in range(len(classes)):
-            loss = classes[i], 100 * class_correct[i] / class_total[i]
-            validation_losses.setdefault(loss[0], []).append(loss[1])
-            print('Validation accuracy of %5s : %2d %%' % (loss))
-        
+            try:
+                loss = classes[i], 100 * class_correct[i] / class_total[i]
+                validation_losses.setdefault(loss[0], []).append(loss[1])
+                print('Validation accuracy of %5s : %2d %%' % (loss))
+            except ZeroDivisionError as e:
+                print(f"Division by zero, not enough validation data.")
+
         true_labels = [int(x) for x in true_labels]
         outs = [int(x) for x in outs]
         print(classification_report(true_labels, outs))
     
     # # Save trained model to storage
     PATH = f'{path}/{modelname}.pth'
-    # torch.save(model.state_dict(), PATH)
+    torch.save(model.state_dict(), PATH)
 
     return (training_losses, validation_losses)
 
@@ -139,8 +141,7 @@ if __name__ == "__main__":
     # Load dataset
     dataset = ImageFolderWithPaths(data_dir, transform=transforms.Compose([
                                                  transforms.ToTensor(),
-                                                 transforms.Resize(image_size)
-                                                 ]))
+                                                 transforms.Resize(image_size)]))
 
 
     classes = dataset.classes
@@ -167,52 +168,52 @@ if __name__ == "__main__":
     indices = np.arange(len(trainset))
 
     # We try to filter out indices that are not in our filters
-    filtered_indices = []
-    negative_filtered_indices = []
+    train_filtered_indices = []
+    train_negative_filtered_indices = []
     for i in tqdm(indices):
         # Retrieve the class label from the trainset
         truth_label =  classes[trainset[i][1]]
 
         # If the output from the filter classifier is equal to the target filter label, then we include this indice in the trainset
         if  filters[truth_label][0].infer(load_input(input_type, trainset[i][2])) == filters[truth_label][1]:
-            filtered_indices.append(i)
+            train_filtered_indices.append(i)
         else:
-            negative_filtered_indices.append(i)
+            train_negative_filtered_indices.append(i)
 
-    # pickle.dump(filtered_indices, open('filtered_indices_postive.p', 'wb'))
-    # pickle.dump(negative_filtered_indices, open('filtered_indices_negative.p', 'wb'))
-    # filtered_indices = pickle.load(open('filtered_indices.p', 'rb'))
-
-    negative_trainset = Subset(trainset, negative_filtered_indices)
-    positive_trainset = Subset(trainset, filtered_indices)
+    positive_trainset = Subset(trainset, train_filtered_indices)
+    negative_trainset = Subset(trainset, train_negative_filtered_indices)
 
     # Filter out images according to defined filters from classifier relations
     indices = np.arange(len(testset))
     
     # # We try to filter out indices that are not in our filters
-    filtered_indices = []
-    negative_filtered_indices = []
+    test_filtered_indices = []
+    test_negative_filtered_indices = []
     for i in tqdm(indices):
         # Retrieve the class label from the testset
         truth_label =  classes[testset[i][1]]
         input_path = testset[i][2]
         # If the output from the filter classifier is equal to the target filter label, then we include this indice in the trainset
         if  filters[truth_label][0].infer(load_input(input_type, input_path)) == filters[truth_label][1]:
-            filtered_indices.append(i)
-            copy(input_path, os.path.join(dest_dir, truth_label))
+            test_filtered_indices.append(i)
         else:
-            negative_filtered_indices.append(i)
-            copy(input_path, os.path.join(f"{dest_dir}_negative", truth_label))
+            test_negative_filtered_indices.append(i)
 
-
-    # pickle.dump(filtered_indices, open('filtered_indices_test_postive.p', 'wb'))
-    # pickle.dump(negative_filtered_indices, open('filtered_indices_test_negative.p', 'wb'))
-
-    negative_testset = Subset(testset, negative_filtered_indices)
-    positive_testset = Subset(testset, filtered_indices)
+    positive_testset = Subset(testset, test_filtered_indices)
+    negative_testset = Subset(testset, test_negative_filtered_indices)
     
+
     print(f"Number of training datapoints after filter: {len(positive_trainset)}")
-    print(Counter([classes[dataset.targets[i]] for i in filtered_indices]))
+    print(Counter([classes[dataset.targets[i]] for i in train_filtered_indices]))
+
+    print(f"Number of negative training datapoints after filter: {len(negative_trainset)}")
+    print(Counter([classes[dataset.targets[i]] for i in train_negative_filtered_indices]))
+
+    print(f"Number of test datapoints after filter: {len(positive_testset)}")
+    print(Counter([classes[dataset.targets[positive_testset.dataset.indices[i]]] for i in test_filtered_indices]))
+
+    print(f"Number of negative test datapoints after filter: {len(negative_testset)}")
+    print(Counter([classes[dataset.targets[negative_testset.dataset.indices[i]]] for i in test_negative_filtered_indices]))
 
     # We train on the filtered data
     training_losses, validation_losses = specialized_train(positive_trainset
@@ -224,26 +225,22 @@ if __name__ == "__main__":
     plt.figure()
     plt.plot(training_losses)
 
-    # plt.figure()
-    # for name, loss in validation_losses.items():
-    #     plt.plot(loss)
+    plt.figure()
+    for name, loss in validation_losses.items():
+        plt.plot(loss)
 
+    # We train the negative version of the specialized classifier
+    training_losses, validation_losses = specialized_train(negative_trainset
+                                                        , negative_testset
+                                                        , model_save_path
+                                                        , f"negative_{model_identifier}"
+                                                        ,target_classifier.train_preprocessing
+                                                        ,target_classifier.preprocessing)
+    plt.figure()
+    plt.plot(training_losses)
 
-    # print(f"Number of training datapoints after filter: {len(negative_trainset)}")
-    # print(Counter([classes[dataset.targets[i]] for i in negative_filtered_indices]))
-
-    # # We train the negative version of the specialized classifier
-    # training_losses, validation_losses = specialized_train(negative_trainset
-    #                                                     , negative_testset
-    #                                                     , model_save_path
-    #                                                     , f"negative_{model_identifier}"
-    #                                                     ,target_classifier.train_preprocessing
-    #                                                     ,target_classifier.preprocessing)
-    # plt.figure()
-    # plt.plot(training_losses)
-
-    # plt.figure()
-    # for name, loss in validation_losses.items():
-    #     plt.plot(loss)
+    plt.figure()
+    for name, loss in validation_losses.items():
+        plt.plot(loss)
 
     plt.show()

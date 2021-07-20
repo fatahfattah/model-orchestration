@@ -8,6 +8,7 @@ from socialstructure import SocialStructure
 from rule import Rule
 from condition import *
 
+from models.cncmany import CNCMANY_NN
 from models.drawing import DRAWING_NN
 from models.not_drawing import NOTDRAWING_NN
 from models.cncmany_drawfilter_positive import CNCMANY_DRAWFILTER_POSITIVE_NN
@@ -28,11 +29,13 @@ class CNCMANY_AGGREGATED_NN(Classifier):
                         "classification")
 
         social_structure = SocialStructure()
+        cncmany = CNCMANY_NN()
         positive_classifier = CNCMANY_DRAWFILTER_POSITIVE_NN()
         negative_classifier = CNCMANY_DRAWFILTER_NEGATIVE_NN()
         drawing = DRAWING_NN()
         not_drawing = NOTDRAWING_NN()
 
+        social_structure.add_classifier(cncmany)
         social_structure.add_classifier(positive_classifier)
         social_structure.add_classifier(negative_classifier)
         social_structure.add_classifier(drawing)
@@ -43,33 +46,32 @@ class CNCMANY_AGGREGATED_NN(Classifier):
         social_structure.add_rule(Rule("filter_none", [FunctionCondition(not_drawing, "not_not_drawing")]))
         social_structure.add_rule(Rule("filter_one", [FunctionCondition(not_drawing, "not_drawing")]))
 
-        social_structure.add_rule(Rule("positive_manychemical", [FunctionCondition(positive_classifier, "manychemical"), ConstantCondition("filter_many")]))
-        social_structure.add_rule(Rule("positive_nonchemical", [FunctionCondition(positive_classifier, "nonchemical"), ConstantCondition("filter_none")]))
-        social_structure.add_rule(Rule("positive_onechemical", [FunctionCondition(positive_classifier, "onechemical"), ConstantCondition("filter_one")]))
+        social_structure.add_rule(Rule("manychemical", [FunctionCondition(positive_classifier, "manychemical"), ConstantCondition("filter_many")]))
+        social_structure.add_rule(Rule("nonchemical", [FunctionCondition(positive_classifier, "nonchemical"), ConstantCondition("filter_none")]))
+        social_structure.add_rule(Rule("onechemical", [FunctionCondition(positive_classifier, "onechemical"), ConstantCondition("filter_one")]))
 
-        social_structure.add_rule(Rule("negative_manychemical", [FunctionCondition(negative_classifier, "manychemical")
-                                                                , ConstantCondition("not positive_manychemical")
-                                                                , ConstantCondition("not positive_nonchemical")
-                                                                , ConstantCondition("not positive_onechemical")]))
+        social_structure.add_rule(Rule("manychemical", [FunctionCondition(negative_classifier, "manychemical")
+                                                                , ConstantCondition("not filter_many")]))
 
-        social_structure.add_rule(Rule("negative_nonchemical", [FunctionCondition(negative_classifier, "nonchemical")
-                                                                , ConstantCondition("not positive_manychemical")
-                                                                , ConstantCondition("not positive_nonchemical")
-                                                                , ConstantCondition("not positive_onechemical")]))
+        social_structure.add_rule(Rule("nonchemical", [FunctionCondition(negative_classifier, "nonchemical")
+                                                                , ConstantCondition("not filter_none")]))
 
-        social_structure.add_rule(Rule("negative_onechemical", [FunctionCondition(negative_classifier, "onechemical")
-                                                                , ConstantCondition("not positive_manychemical")
-                                                                , ConstantCondition("not positive_nonchemical")
-                                                                , ConstantCondition("not positive_onechemical")]))
+        social_structure.add_rule(Rule("onechemical", [FunctionCondition(negative_classifier, "onechemical")
+                                                                , ConstantCondition("not filter_one")]))
 
-        social_structure.add_rule(Rule("manychemical", [ConstantCondition("positive_manychemical")]))
-        social_structure.add_rule(Rule("manychemical", [ConstantCondition("negative_manychemical")]))
+        social_structure.add_rule(Rule("manychemical", [FunctionCondition(cncmany, "manychemical")
+                                                                , ConstantCondition("not onechemical")
+                                                                , ConstantCondition("not nonchemical")]))
+                                                                
+        social_structure.add_rule(Rule("nonchemical", [FunctionCondition(cncmany, "nonchemical")
+                                                                , ConstantCondition("not manychemical")
+                                                                , ConstantCondition("not onechemical")]))
 
-        social_structure.add_rule(Rule("nonchemical", [ConstantCondition("positive_nonchemical")]))
-        social_structure.add_rule(Rule("nonchemical", [ConstantCondition("negative_nonchemical")]))
+        social_structure.add_rule(Rule("onechemical", [FunctionCondition(cncmany, "onechemical")
+                                                                , ConstantCondition("not manychemical")
+                                                                , ConstantCondition("not nonchemical")]))
 
-        social_structure.add_rule(Rule("onechemical", [ConstantCondition("positive_onechemical")]))
-        social_structure.add_rule(Rule("onechemical", [ConstantCondition("negative_onechemical")]))
+
 
         self.orchestrator = Orchestrator(social_structure)
 
@@ -80,5 +82,4 @@ class CNCMANY_AGGREGATED_NN(Classifier):
         Infer
         Return
         """
-
         return self.orchestrator.infer({'image':image})[-1][-1]

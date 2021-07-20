@@ -30,29 +30,27 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-image", help="Provide the path to an input image.", required=False)
     parser.add_argument("-text", help="Provide the path to an input text.", required=False)
-    parser.add_argument("-o", help="Provide the label(s) which you want the network to classify.", required=False)
     args = parser.parse_args()
 
     image_filename = args.image if args.image else 'example_image.tif'
-    output_labels = args.o.split(',') if args.o else []
     
     social_structure = SocialStructure()
     
     # cnc = CNC_NN()
-    cncmany_aggregated = CNCMANY_AGGREGATED_NN()
-    # cncmany = CNCMANY_NN()
+    # cncmany_aggregated = CNCMANY_AGGREGATED_NN()
+    cncmany = CNCMANY_NN()
     # hl = HL_NN()
     # pc = PC_NN()
 
     # social_structure.add_classifier(cnc)
-    social_structure.add_classifier(cncmany_aggregated)
-    # social_structure.add_classifier(cncmany)
+    # social_structure.add_classifier(cncmany_aggregated)
+    social_structure.add_classifier(cncmany)
     # social_structure.add_classifier(hl)
     # social_structure.add_classifier(pc)
 
-    social_structure.add_rule(Rule("onechemicalstructure", [FunctionCondition(cncmany_aggregated, "onechemical")]))
-    social_structure.add_rule(Rule("manychemicalstructure", [FunctionCondition(cncmany_aggregated, "manychemical")]))
-    social_structure.add_rule(Rule("nonchemicalimage", [FunctionCondition(cncmany_aggregated, "nonchemical")]))
+    social_structure.add_rule(Rule("onechemicalstructure", [FunctionCondition(cncmany, "onechemical")]))
+    social_structure.add_rule(Rule("manychemicalstructure", [FunctionCondition(cncmany, "manychemical")]))
+    social_structure.add_rule(Rule("nonchemicalimage", [FunctionCondition(cncmany, "nonchemical")]))
 
     # Initialize our inputs dictionary and process the paths into data tensors
     inputs_dict = {"image": image_filename}
@@ -64,7 +62,4 @@ if __name__ == "__main__":
     answer_sets = orchestrator.infer(inputs_tensor_dict)
 
     print(f"Answer sets: {answer_sets}")
-    if output_labels:
-        print(f"The truth value of the desired output(s):")
-        for output_label in output_labels:
-            print(f"{output_label}:{output_label in answer_sets[-1]}")
+    print(f"Prediction: {answer_sets[-1][-1]}")
